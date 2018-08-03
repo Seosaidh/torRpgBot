@@ -67,7 +67,7 @@ public class torRpgBot extends ListenerAdapter {
         try
         {
             JDA jda = new JDABuilder(AccountType.BOT)
-                    .setToken("NDc0MTc1MTcxNjI4ODkyMTYz.DkPmZQ.But7C2GrQB9nrMxUYaQBBw6ZD54")           //The token of the account that is logging in.
+                    .setToken("REDACTED")           //The token of the account that is logging in.
                     .addEventListener(new torRpgBot())  //An instance of a class that will handle events.
                     .buildBlocking();  //There are 2 ways to login, blocking vs async. Blocking guarantees that JDA will be completely loaded.
         
