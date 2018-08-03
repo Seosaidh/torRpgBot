@@ -14,6 +14,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import javax.security.auth.login.LoginException;
 import java.util.List;
 import java.util.Random;
+import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,36 +23,36 @@ import org.apache.logging.log4j.Logger;
 
 
 enum COMMAND {
-	ROLL(new String[] {"R"}) {
+	ROLL(Arrays.asList(new String[] {"r"})) {
 		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
-			return TorDice.handleRollCommand(msg, author, false, false);
+			return TorDice.handleRollCommand(msg, author, false);
 		}
 	},
-	WEARY(new String[] {"W"}) {
+	/*WEARY(new String[] {"w"}) {
 		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
 			return TorDice.handleRollCommand(msg, author, false, true);
 		}
-	},
-	ADVERSARY(new String[] {"A", "ADV"}) {
+	},*/
+	ADVERSARY(Arrays.asList(new String[] {"a", "adv"})) {
 		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
-			return TorDice.handleRollCommand(msg, author, true, false);
+			return TorDice.handleRollCommand(msg, author, true);
 		}
 	},
-	WEARY_ADVERSARY(new String[] {"WA", "WADV", "WEARYA"}) {
+	/*WEARY_ADVERSARY(new String[] {"wa", "wadv", "wearyadv"}) {
 		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
 			return TorDice.handleRollCommand(msg, author, true, true);
 		}
-	};
+	}*/;
 	
 	public abstract String handleCommand(String msg, User author, MessageReceivedEvent event);
 	
-	private String[] alternates;
+	private List<String> alternates;
 	
-	COMMAND(String[] alts) {
+	COMMAND(List<String> alts) {
 		this.alternates = alts;
 	}
 	
-	public String[] getAlts() {
+	public List<String> getAlts() {
 		return this.alternates;
 	}
 }
@@ -95,6 +96,8 @@ public class torRpgBot extends ListenerAdapter {
         long responseNumber = event.getResponseNumber();//The amount of discord events that JDA has received since the last reconnect.
         final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
         
+        String commandFlag = "!";
+        
 
         if (event.getAuthor().isBot())
         {
@@ -106,9 +109,30 @@ public class torRpgBot extends ListenerAdapter {
         Message message = event.getMessage();           //The message that was received.
         MessageChannel channel = event.getChannel();    //This is the MessageChannel that the message was sent to.
                                                         //  This could be a TextChannel, PrivateChannel, or Group!
+        
+        if (!event.isFromType(ChannelType.TEXT))
+        {
+        	//Don't handle anything outside of a text channel in a guild (server)
+        	return;
+        }
+        
+        Guild guild = event.getGuild();
+        TextChannel textChannel = event.getTextChannel(); //The TextChannel that this message was sent to.
+        Member member = event.getMember();          //This Member that sent the message. Contains Guild specific information about the User!
+        String name;
+        if (message.isWebhookMessage())
+        {
+            name = author.getName();                //If this is a Webhook message, then there is no Member associated
+        }                                           // with the User, thus we default to the author for name.
+        else
+        {
+            name = member.getEffectiveName();       //This will either use the Member's nickname if they have one,
+        }                                           // otherwise it will default to their username. (User#getName())
 
         String msg = message.getContentDisplay();              //This returns a human readable version of the Message. Similar to
                                                         // what you would see in the client.
+        
+        LOGGER.debug("({})[{}]<{}>: {}\n", guild.getName(), textChannel.getName(), name, msg);
         
         msg = msg.trim();
         
@@ -116,82 +140,44 @@ public class torRpgBot extends ListenerAdapter {
         {
         	return;
         }
-
-        if (event.isFromType(ChannelType.TEXT))         //If this message was sent to a Guild TextChannel
+        
+        if (msg.startsWith(commandFlag))
         {
-            //Because we now know that this message was sent in a Guild, we can do guild specific things
-            // Note, if you don't check the ChannelType before using these methods, they might return null due
-            // the message possibly not being from a Guild!
-
-            Guild guild = event.getGuild();             //The Guild that this message was sent in. (note, in the API, Guilds are Servers)
-            TextChannel textChannel = event.getTextChannel(); //The TextChannel that this message was sent to.
-            Member member = event.getMember();          //This Member that sent the message. Contains Guild specific information about the User!
-
-            String name;
-            if (message.isWebhookMessage())
-            {
-                name = author.getName();                //If this is a Webhook message, then there is no Member associated
-            }                                           // with the User, thus we default to the author for name.
-            else
-            {
-                name = member.getEffectiveName();       //This will either use the Member's nickname if they have one,
-            }                                           // otherwise it will default to their username. (User#getName())
-
-            //System.out.printf("(%s)[%s]<%s>: %s\n", guild.getName(), textChannel.getName(), name, msg);
-            LOGGER.debug("({})[{}]<{}>: {}\n", guild.getName(), textChannel.getName(), name, msg);
-        }
-        else if (event.isFromType(ChannelType.PRIVATE)) //If this message was sent to a PrivateChannel
-        {
-            //The message was sent in a PrivateChannel.
-            //In this example we don't directly use the privateChannel, however, be sure, there are uses for it!
-            PrivateChannel privateChannel = event.getPrivateChannel();
-
-            //System.out.printf("[PRIV]<%s>: %s\n", author.getName(), msg);
-            LOGGER.debug("[PRIV]<%s>: %s\n", author.getName(), msg);
-        }
-        else if (event.isFromType(ChannelType.GROUP))   //If this message was sent to a Group. This is CLIENT only!
-        {
-            //The message was sent in a Group. It should be noted that Groups are CLIENT only.
-            Group group = event.getGroup();
-            String groupName = group.getName() != null ? group.getName() : "";  //A group name can be null due to it being unnamed.
-
-            //System.out.printf("[GRP: %s]<%s>: %s\n", groupName, author.getName(), msg);
-            LOGGER.debug("[GRP: %s]<%s>: %s\n", groupName, author.getName(), msg);
+        	String output = "";
+        	boolean processedCommand = false;
+        	msg = msg.substring(commandFlag.length());
+        	
+        	String[] command = msg.split(" ", 2);
+        	
+        	if (command.length < 2)
+        	{
+        		command = new String[] {command[0], ""};
+        	}
+        	
+        	LOGGER.debug("The command string is {} and the command body is {}", command[0], command[1]);
+        	
+        	for(COMMAND c : COMMAND.values())
+        	{
+        		if (c.name().equalsIgnoreCase(command[0]) || c.getAlts().contains(command[0].toLowerCase()))
+        		{
+        			LOGGER.debug("Command {} matched COMMAND enum {} (alts: {})", command[0], c.name(), c.getAlts());
+        			output = c.handleCommand(command[1], author, event);
+        			processedCommand = true;
+        			break;
+        		}
+        	}
+        	
+        	if (!processedCommand)
+        	{
+        		output = "ERROR! Invalid command " + command[0];
+        	}
+        	
+        	if (!output.isEmpty())
+        	{
+        		channel.sendMessage(output).queue();
+        	}
         }
 
-
-        //Now that you have a grasp on the things that you might see in an event, specifically MessageReceivedEvent,
-        // we will look at sending / responding to messages!
-        //This will be an extremely simplified example of command processing.
-
-        //Remember, in all of these .equals checks it is actually comparing
-        // message.getContentDisplay().equals, which is comparing a string to a string.
-        // If you did message.equals() it will fail because you would be comparing a Message to a String!
-        if (msg.equals("!ping"))
-        {
-            //This will send a message, "pong!", by constructing a RestAction and "queueing" the action with the Requester.
-            // By calling queue(), we send the Request to the Requester which will send it to discord. Using queue() or any
-            // of its different forms will handle ratelimiting for you automatically!
-
-            channel.sendMessage("pong!").queue();
-        }
-        else if (msg.equals("!roll"))
-        {
-            //In this case, we have an example showing how to use the Success consumer for a RestAction. The Success consumer
-            // will provide you with the object that results after you execute your RestAction. As a note, not all RestActions
-            // have object returns and will instead have Void returns. You can still use the success consumer to determine when
-            // the action has been completed!
-
-            Random rand = new Random();
-            int roll = rand.nextInt(6) + 1; //This results in 1 - 6 (instead of 0 - 5)
-            channel.sendMessage("Your roll: " + roll).queue(sentMessage ->  //This is called a lambda statement. If you don't know
-            {                                                               // what they are or how they work, try google!
-                if (roll < 3)
-                {
-                    channel.sendMessage("The roll for messageId: " + sentMessage.getId() + " wasn't very good... Must be bad luck!\n").queue();
-                }
-            });
-        }
-    }
+    } // End of onMessageReceived function
 
 }
