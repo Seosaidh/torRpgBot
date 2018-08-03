@@ -70,6 +70,14 @@ public class torRpgBot extends ListenerAdapter {
                     .setToken("NDc0MTc1MTcxNjI4ODkyMTYz.DkPmZQ.But7C2GrQB9nrMxUYaQBBw6ZD54")           //The token of the account that is logging in.
                     .addEventListener(new torRpgBot())  //An instance of a class that will handle events.
                     .buildBlocking();  //There are 2 ways to login, blocking vs async. Blocking guarantees that JDA will be completely loaded.
+        
+            final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+            List<Emote> emotes = jda.getEmotes();
+            
+            for (Emote e : emotes)
+            {
+            	LOGGER.debug("Emote name {}, id {} id-long {}", e.getName(), e.getId(), e.getIdLong());
+            }
         }
         catch (LoginException e)
         {
@@ -84,6 +92,8 @@ public class torRpgBot extends ListenerAdapter {
             // you use buildBlocking in a thread that has the possibility of being interrupted (async thread usage and interrupts)
             e.printStackTrace();
         }
+        
+
 
 	}
 	
@@ -97,6 +107,7 @@ public class torRpgBot extends ListenerAdapter {
         final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
         
         String commandFlag = "!";
+
         
 
         if (event.getAuthor().isBot())
@@ -174,6 +185,7 @@ public class torRpgBot extends ListenerAdapter {
         	
         	if (!output.isEmpty())
         	{
+        		LOGGER.debug("Sending message {} to channel {}", output, channel.getName());
         		channel.sendMessage(output).queue();
         	}
         }
