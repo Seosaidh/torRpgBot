@@ -6,19 +6,19 @@ import net.dv8tion.jda.core.entities.User;
 
 public class TorDice {
 	
-	public String handleRollCommand(String command, User author) {
+	public static String handleRollCommand(String command, User author, boolean isAdversary, boolean isWeary) {
 		return "";
 	}
 	
-	private int rollFeat() {
+	private static int rollFeat() {
 		return new Random().nextInt(12) + 1;
 	}
 	
-	private int rollSuccess() {
+	private static int rollSuccess() {
 		return new Random().nextInt(6) + 1;
 	}
 	
-	private String compileResult(int feat, int[] success, int target, String author, String skill, boolean isAdversary) {
+	private static String compileResult(int feat, int[] success, int target, String author, String skill, boolean isAdversary, boolean isWeary) {
 		String result = new String();
 		int sum = feat;
 		boolean isGreatSuccess = false;

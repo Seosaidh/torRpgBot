@@ -15,7 +15,50 @@ import javax.security.auth.login.LoginException;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+
+
+
+enum COMMAND {
+	ROLL(new String[] {"R"}) {
+		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
+			return TorDice.handleRollCommand(msg, author, false, false);
+		}
+	},
+	WEARY(new String[] {"W"}) {
+		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
+			return TorDice.handleRollCommand(msg, author, false, true);
+		}
+	},
+	ADVERSARY(new String[] {"A", "ADV"}) {
+		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
+			return TorDice.handleRollCommand(msg, author, true, false);
+		}
+	},
+	WEARY_ADVERSARY(new String[] {"WA", "WADV", "WEARYA"}) {
+		public String handleCommand(String msg, User author, MessageReceivedEvent event) {
+			return TorDice.handleRollCommand(msg, author, true, true);
+		}
+	};
+	
+	public abstract String handleCommand(String msg, User author, MessageReceivedEvent event);
+	
+	private String[] alternates;
+	
+	COMMAND(String[] alts) {
+		this.alternates = alts;
+	}
+	
+	public String[] getAlts() {
+		return this.alternates;
+	}
+}
+
 public class torRpgBot extends ListenerAdapter {
+	
+
 
 	public static void main(String[] args) {
         //We construct a builder for a BOT account. If we wanted to use a CLIENT account
@@ -50,6 +93,8 @@ public class torRpgBot extends ListenerAdapter {
         //These are provided with every event in JDA
         JDA jda = event.getJDA();                       //JDA, the core of the api.
         long responseNumber = event.getResponseNumber();//The amount of discord events that JDA has received since the last reconnect.
+        final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+        
 
         if (event.getAuthor().isBot())
         {
@@ -64,6 +109,13 @@ public class torRpgBot extends ListenerAdapter {
 
         String msg = message.getContentDisplay();              //This returns a human readable version of the Message. Similar to
                                                         // what you would see in the client.
+        
+        msg = msg.trim();
+        
+        if (msg.isEmpty())
+        {
+        	return;
+        }
 
         if (event.isFromType(ChannelType.TEXT))         //If this message was sent to a Guild TextChannel
         {
@@ -85,7 +137,8 @@ public class torRpgBot extends ListenerAdapter {
                 name = member.getEffectiveName();       //This will either use the Member's nickname if they have one,
             }                                           // otherwise it will default to their username. (User#getName())
 
-            System.out.printf("(%s)[%s]<%s>: %s\n", guild.getName(), textChannel.getName(), name, msg);
+            //System.out.printf("(%s)[%s]<%s>: %s\n", guild.getName(), textChannel.getName(), name, msg);
+            LOGGER.debug("({})[{}]<{}>: {}\n", guild.getName(), textChannel.getName(), name, msg);
         }
         else if (event.isFromType(ChannelType.PRIVATE)) //If this message was sent to a PrivateChannel
         {
@@ -93,7 +146,8 @@ public class torRpgBot extends ListenerAdapter {
             //In this example we don't directly use the privateChannel, however, be sure, there are uses for it!
             PrivateChannel privateChannel = event.getPrivateChannel();
 
-            System.out.printf("[PRIV]<%s>: %s\n", author.getName(), msg);
+            //System.out.printf("[PRIV]<%s>: %s\n", author.getName(), msg);
+            LOGGER.debug("[PRIV]<%s>: %s\n", author.getName(), msg);
         }
         else if (event.isFromType(ChannelType.GROUP))   //If this message was sent to a Group. This is CLIENT only!
         {
@@ -101,7 +155,8 @@ public class torRpgBot extends ListenerAdapter {
             Group group = event.getGroup();
             String groupName = group.getName() != null ? group.getName() : "";  //A group name can be null due to it being unnamed.
 
-            System.out.printf("[GRP: %s]<%s>: %s\n", groupName, author.getName(), msg);
+            //System.out.printf("[GRP: %s]<%s>: %s\n", groupName, author.getName(), msg);
+            LOGGER.debug("[GRP: %s]<%s>: %s\n", groupName, author.getName(), msg);
         }
 
 

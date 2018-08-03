@@ -8,15 +8,30 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/junit-3.8.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-api-1.5.11.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-api-1.6.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-api-1.6.99.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-api-2.0.99.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-nop-1.5.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-simple-1.4.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-simple-1.5.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-simple-1.5.11.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-simple-1.6.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/slf4j-1.7.25/integration/lib/slf4j-simple-1.6.99.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-slf4j-impl-2.11.1.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-to-slf4j-2.11.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-to-slf4j-2.11.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-core-2.11.1.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-core-2.11.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-core-2.11.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-api-2.11.1.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-api-2.11.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/apache-log4j-2.11.1-bin/log4j-api-2.11.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/jackson/jackson-core-2.9.6.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/jackson/jackson-core-2.9.6-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/jackson/jackson-core-2.9.6-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/jackson/jackson-annotations-2.9.6.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/jackson/jackson-annotations-2.9.6-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/jackson/jackson-annotations-2.9.6-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
