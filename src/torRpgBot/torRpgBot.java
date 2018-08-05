@@ -26,7 +26,7 @@ public class torRpgBot {
         try
         {
         	JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT)
-                    .setToken("NDc0MTc1MTcxNjI4ODkyMTYz.DkaAQQ.3tOaHY2kkArqJ0KlyjhN5i9hP6U");//The token of the account that is logging in.
+                    .setToken("READACTED");//The token of the account that is logging in.
 
             // Insert command registration here. Each command class needs to be registered by calling
             // jdaBuilder.addEventListener(new CommandExtension(flag));
