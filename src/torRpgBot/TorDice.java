@@ -1,41 +1,287 @@
 package torRpgBot;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.User;
 
 
-public class TorDice {
+public abstract class TorDice extends Command{
+	
+	enum POSSIBLE{
+		OPTIONS,
+		SUCCESS,
+		MASTERY,
+		SIGN,
+		MODIFIER,
+		SKILL,
+		GREATER_THAN,
+		TN
+	}
 	
 	private static Random rand = new Random();
-	private static final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+	private final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+	
+	/*
+	 * This class is used to store the results of parsing the command body.
+	 */
+	private class CommandResults {
+		public boolean isWeary = false;
+		public boolean hasAdvantage = false;
+		public boolean hasDisadvantage = false;
+		public boolean parseSuccessful = false;
+		public int numOfSuccess = 0;
+		public int numOfMastery = 0;
+		public int modifier = 0;
+		public int targetNumber = 14;
+		public String skillName = "";
+	}
+	
+	public TorDice(String flag) {
+		super(flag);
+	}
+
 	
 	/**
 	 * This function is used as the interface to handle all TOR rolling commands.
 	 * The commands will be in the following format:
-	 * [w][a|d] NUM_OF_SUCCESS_DICE [+NUM_OF_MASTERY_DICE] SKILL_NAME [> TN]
+	 * [w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]
 	 * The fields are as follows:
 	 * 		w: The character is weary
 	 * 		a: The character is rolling with advantage (roll two feat dice and keep the best result)
 	 * 		d: The character is rolling with disadvantage (roll two feat dice and keep the worst result)
 	 * 	If the number of mastery dice is left out, it is assumed to be 0.
+	 *  If the modifier is left out, it is assumed to be 0.
 	 *  If the TN is left out, it is assumed to be 14.
 	 *  @param command The string containing the roll command.
 	 *  @param author The User variable that contains the author. Currently unused.
 	 *  @param isAdversary Boolean true if the roll is from an adversary, false otherwise.
 	 *  @return String containing the result of the roll formatted such as to be ready to send to Discord.
 	 */
-	public static String handleRollCommand(String command, User author, boolean isAdversary) {
-		return "To be implemented";
+	public String handleRollCommand(String command, User author, boolean isAdversary, Guild guild) {
+
+		CommandResults parsedCommand = parseCommandString(command);
+		int[] successDice;
+		int[] feat;
+		
+		if (!parsedCommand.parseSuccessful)
+		{
+			LOGGER.error("The command string {} is invalid. Please follow the proper syntax"
+					+ " `[w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]`", command);
+			
+			return "The command string " + command +
+					" is invalid. Please follow the proper syntax "
+					+ "`[w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]`";
+		}
+		
+		feat = rollFeat(parsedCommand, isAdversary);
+		
+		if(parsedCommand.numOfSuccess > 0)
+		{
+			successDice = rollSuccess(parsedCommand.numOfSuccess, parsedCommand.numOfMastery);
+		}
+		else
+		{
+			successDice = new int[0];
+		}
+		
+		return compileResult(feat, successDice, isAdversary, parsedCommand, author);
+	}
+	
+	
+	/**
+	 * This function parses the input string to fill in a CommandResults structure and then return it.
+	 * It parses the string according to the syntax defined for roll commands:
+	 * [w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]
+	 * @param command The string containing the command body, which should conform to the syntax above.
+	 * @return A CommandResults structure containing the results of the parsed command. In particular, the parseSuccessful field will only be true if we successfully parse out a numberOfSuccess and skillName.
+	 */
+	private CommandResults parseCommandString(String command) {
+
+		CommandResults result = new CommandResults();
+		
+		result.parseSuccessful = false;
+		
+		boolean haveSuccess = false;
+		boolean haveSkill = false;
+		boolean negativeModifier = false;
+		
+		List<POSSIBLE> possibleNext = new ArrayList<POSSIBLE>();
+		possibleNext.add(POSSIBLE.OPTIONS);
+		possibleNext.add(POSSIBLE.SUCCESS);
+		
+		String[] words = command.split(" ");
+		
+		/*
+		 * words[0] is either the options w, a|d; or is the number of success dice.
+		 * words[1] is either the numOfSuccess, numOfMastery, +-, modifier, or skillName
+		 * words[2] is either the numOfMastery, +-, modifier, skillName, or > or might not exist
+		 * words[3] is either the +-, modifier, skillName, or > or TN or might not exist
+		 * words[4] is either the modifier, skillName or > or TN or might not exist
+		 * words[5] is either the skillName, > or TN, or might not exist
+		 * words[6] is either > or the TN or might not exist.
+		 * words[7] is either the TN or doesn't exist.
+		 * 
+		 * words must be at least two long and can be no more than 8 long
+		 */
+		
+		if (words.length < 2 || words.length > 8)
+		{
+			LOGGER.error("Bad command body. Not enough or too many words. Full body: {}", command);
+			return result;
+		}
+		
+		for (int i = 0; i < words.length; i++)
+		{
+			if (possibleNext.contains(POSSIBLE.OPTIONS))
+			{
+				if (words[i].contains("w"))
+				{
+					result.isWeary = true;
+				}
+				
+				if (words[i].contains("a"))
+				{
+					result.hasAdvantage = true;
+				}
+				else if (words[i].contains("d"))
+				{
+					result.hasDisadvantage = true;
+				}
+				
+				// Even if we don't find the options on the first iteration of the loop, remove it from the possible options anyway,
+				// since it's only allowed in the first word.
+				possibleNext.remove(POSSIBLE.OPTIONS);
+			}
+			
+			if (possibleNext.contains(POSSIBLE.SUCCESS))
+			{
+				try
+				{
+					result.numOfSuccess = Integer.parseInt(words[i]);
+					haveSuccess = true;
+					possibleNext.clear();
+					possibleNext.add(POSSIBLE.MASTERY);
+					possibleNext.add(POSSIBLE.SIGN);
+					possibleNext.add(POSSIBLE.MODIFIER);
+					possibleNext.add(POSSIBLE.SKILL);
+				}
+				catch (NumberFormatException e)
+				{
+					if (i > 1)
+					{
+						LOGGER.error("Bad message format. Neither the first nor second word results in a number. The full command body is: {}", command);
+						return result;
+					}
+				}
+			}
+			
+			if (possibleNext.contains(POSSIBLE.MASTERY))
+			{
+				if (words[i].startsWith("("));
+				{
+					String mastery = words[i].substring(1, words[i].length() - 1);
+					
+					try
+					{
+						result.numOfMastery = Integer.parseInt(mastery);
+						possibleNext.remove(POSSIBLE.MASTERY);
+					}
+					catch (NumberFormatException e)
+					{
+						LOGGER.error("Bad message format. No number enclosed in the parentheses denoting number of mastery dice. Full command string: {}", command);
+						return result;
+					}
+				}
+			}
+			
+			if (possibleNext.contains(POSSIBLE.SIGN))
+			{
+				if (words[i].equals("+") || words[i].equals("-"))
+				{
+					possibleNext.remove(POSSIBLE.SIGN);
+					possibleNext.remove(POSSIBLE.MASTERY);
+					
+					if (words[i].equals("-"))
+					{
+						negativeModifier = true;
+					}
+				}
+			}
+			
+			if (possibleNext.contains(POSSIBLE.MODIFIER))
+			{
+				try
+				{
+					result.modifier = Integer.parseInt(words[i]);
+					
+					if (negativeModifier && result.modifier > 0)
+					{
+						result.modifier = -result.modifier;
+					}
+					
+					possibleNext.remove(POSSIBLE.SIGN);
+					possibleNext.remove(POSSIBLE.MODIFIER);
+					possibleNext.remove(POSSIBLE.MASTERY);
+				}
+				catch (NumberFormatException e)
+				{
+					
+				}
+			}
+			
+			if (possibleNext.contains(POSSIBLE.SKILL))
+			{
+				if (words[i].matches("^([A-Z]|[a-z])+"))
+				{
+					result.skillName = words[i];
+					possibleNext.clear();
+					possibleNext.add(POSSIBLE.GREATER_THAN);
+					possibleNext.add(POSSIBLE.TN);
+				}
+			}
+			
+			if (possibleNext.contains(POSSIBLE.GREATER_THAN))
+			{
+				if (words[i].startsWith(">"))
+				{
+					possibleNext.remove(POSSIBLE.GREATER_THAN);
+				}
+			}
+			
+			if (possibleNext.contains(POSSIBLE.TN))
+			{
+				try
+				{
+					result.targetNumber = Integer.parseInt(words[i]);
+					possibleNext.clear();
+				}
+				catch (NumberFormatException e)
+				{
+					
+				}
+			}
+		} // end loop through the command words.
+		
+		
+		if (haveSuccess && haveSkill)
+		{
+			result.parseSuccessful = true;
+		}
+		
+		return result;
 	}
 	
 	/*
 	 * This function simply rolls a d12 and returns the integer result.
 	 */
-	private static int rolld12() {
+	private int rolld12() {
 		return rand.nextInt(12) + 1;
 	}
 	
@@ -48,20 +294,20 @@ public class TorDice {
 	 * @param hasAdvantage Boolean true if the roll has advantage.
 	 * @param hasDisadvantage Boolean true if the roll has disadvantage.
 	 * @param isAdversary Boolean true if the roll is performed by an adversary, false otherwise.
-	 * @return The correct integer value of the feat die roll, including any selection due to advantage/disadvantage. Also 0 for the appropriate roll (EoS/GRune). -1 on Error.
+	 * @return An int array containing the roll results. Also 0 for the appropriate roll (EoS/GRune). -1 on Error.
 	 */
-	private static int rollFeat(boolean hasAdvantage, boolean hasDisadvantage, boolean isAdversary) {
+	private int[] rollFeat(CommandResults command, boolean isAdversary) {
 		int roll1, roll2;
 		roll1 = rolld12();
 		roll2 = rolld12();
 		
 		LOGGER.debug("The first d12 rolled came up {} and the second {}", roll1, roll2);
 		
-		if (hasAdvantage && hasDisadvantage)
+		if (command.hasAdvantage && command.hasDisadvantage)
 		{
 			LOGGER.error("You cannot roll with both advantage and disadvantage. The roll will be treated as if neither was applicable.");
-			hasAdvantage = false;
-			hasDisadvantage = false;
+			command.hasAdvantage = false;
+			command.hasDisadvantage = false;
 		}
 		
 		if (isAdversary)
@@ -93,106 +339,177 @@ public class TorDice {
 			}
 		}
 		
-		if (hasAdvantage)
+		if (command.hasAdvantage || command.hasDisadvantage)
 		{
-			LOGGER.debug("The character has advantage, returning the best roll ({})", Math.max(roll1, roll2));
-			return Math.max(roll1, roll2);
-		}
-		else if (hasDisadvantage)
-		{
-			LOGGER.debug("The character has disadvantage, returning the worst roll ({})", Math.min(roll1, roll2));
-			return Math.min(roll1, roll2);
+			LOGGER.debug("The character rolled two feat dice, returning both of them. ({}, {})", roll1, roll2);
+			return new int[] {roll1, roll2};
 		}
 		else
 		{
 			LOGGER.debug("The character has neither advantage nor disadvantage, returning the first roll ({})", roll1);
-			return roll1;
+			return new int[] {roll1};
 		}
 	}
 	
 	/*
 	 * This function simply rolls a d6 and returns the result as an integer.
 	 */
-	private static int rolld6() {
+	private int rolld6() {
 		return rand.nextInt(6) + 1;
+	}
+	
+	
+	/**
+	 * This rolls all the d6 dice necessary to complete the roll, including mastery dice.
+	 * Once all the dice have been rolled, it sorts the results and returns an array with the results in
+	 * descending order (largest number first).
+	 * @param numOfSuccess Number of success dice to roll.
+	 * @param numOfMastery Number of mastery dice to roll.
+	 * @return integer array containing the results of all dice rolled in descending order.
+	 */
+	private int[] rollSuccess(int numOfSuccess, int numOfMastery) {
+		int[] results = new int[numOfSuccess + numOfMastery];
+		List<Integer> fullResults = new ArrayList<Integer>(numOfSuccess + numOfMastery);
+		
+		for (int i = 0; i < (numOfSuccess + numOfMastery); i++)
+		{
+			fullResults.add(new Integer(rolld6()));
+		}
+		
+		Collections.sort(fullResults, Collections.reverseOrder());
+
+		// I originally was only going to show the results of the relevant success dice, but decided to show
+		// the results of the mastery dice as well. If you want to only show the success dice, remove the
+		// "+ numOfMastery" from both this for loop and the declaration of the results array.
+		for (int i = 0; i < numOfSuccess + numOfMastery; i++)
+		{
+			results[i] = fullResults.get(i).intValue();
+		}		
+		
+		return results;
 	}
 	
 	/**
 	 * This function takes the feat result and the array of success results,
 	 * along with the various modifiers and then constructs the string describing the result of the roll.
 	 * @param feat The integer describing the feat die result. It will be 0 for the appropriate roll, so no conversion is needed while adding.
-	 * @param success The integer array of the relevant success dice (with mastery dice already removed).
-	 * @param target The target number that must be beaten.
-	 * @param author The string with the name of the person who issued the roll command.
-	 * @param skill The string of the skill rolled.
+	 * @param success The integer array of the relevant success dice.
 	 * @param isAdversary Boolean true if the roll was performed by an adversary. Necessary to know what emoji to use for 0 on the feat die.
-	 * @param isWeary Boolean true if the character is weary. Necessary since we have to know the numbers rolled for the emojis, but must also know how to sum the result.
+	 * @param command The command structure containing all the relevant information to interpret the dice.
+	 * @param author The User structure for the user who sent the command.
 	 * @return String to be sent to Discord describing the roll and the result.
 	 */
-	private static String compileResult(int feat, int[] success, int target, String author, String skill,
-			boolean isAdversary, boolean isWeary) {
+	private String compileResult(int[] feat, int[] success, boolean isAdversary, CommandResults command, User author) {
 		String result = new String();
-		int sum = feat;
+		int sum = 0;
+		
+		if (feat.length > 1 && command.hasAdvantage)
+		{
+			
+			sum = Math.max(feat[0], feat[1]);
+		}
+		else if (feat.length > 1 && command.hasDisadvantage)
+		{
+			sum = Math.min(feat[0], feat[1]);
+		}
+		else
+		{
+			sum = feat[0];
+		}
 		boolean isGreatSuccess = false;
 		boolean isExtraordinarySuccess = false;
-		boolean succeeded = false;
 		
-		result.concat(author);
+		result.concat(author.getName());
 		result.concat(" rolled ");
-		result.concat(skill);
-		result.concat(" ");
+		result.concat(command.skillName);
+		result.concat(" and got");
 		result.concat(Integer.toString(success.length));
 		result.concat(": ");
-		result.concat(Integer.toString(feat));
+		result.concat(Integer.toString(sum));
+		
+		if (command.hasAdvantage)
+		{
+			result.concat(" (");
+			result.concat(Integer.toString(Math.min(feat[0], feat[1])));
+			result.concat(")");
+		}
+		else if (command.hasDisadvantage)
+		{
+			result.concat(" (");
+			result.concat(Integer.toString(Math.max(feat[0], feat[1])));
+			result.concat(")");
+		}
 		
 		for (int i = 0; i < success.length; i++)
 		{
-			result.concat(", ");
+			if (i == command.numOfSuccess)
+			{
+				result.concat(" (");
+			}
+			else
+			{
+				result.concat(", ");
+			}
 			result.concat(Integer.toString(success[i]));
 			
-			if (isWeary && success[i] <= 3)
+			if (i >= command.numOfSuccess)
+			{
+				LOGGER.debug("We are now in the mastery dice, so don't add them in.");
+			}
+			else if (command.isWeary && success[i] <= 3)
 			{
 				LOGGER.debug("The character is weary, so a result of {} is actually 0.", success[i]);
 			}
 			else
 			{
 				sum = sum + success[i];
-			}
-			
-			if (success[i] == 6)
-			{
-				if (isGreatSuccess)
+				
+				if (success[i] == 6)
 				{
-					isExtraordinarySuccess = true;
-				}
-				else
-				{
-					isGreatSuccess = true;
+					if (isGreatSuccess)
+					{
+						isExtraordinarySuccess = true;
+					}
+					else
+					{
+						isGreatSuccess = true;
+					}
 				}
 			}
 		}
 		
-		result.concat(". \n");
-		
-		if ((isAdversary && feat == 11) || (!isAdversary && feat == 12) || sum >= target)
+		if (command.numOfMastery > 0)
 		{
-			succeeded = true;
+			result.concat(")");
+		}
+		
+		sum += command.modifier;
+		
+		result.concat(". \n");
+		result.concat("Sum = ");
+		result.concat(Integer.toString(sum));
+		result.concat(" and TN = ");
+		result.concat(Integer.toString(command.targetNumber));
+		result.concat(". ");
+		
+		if ((isAdversary && feat[0] == 11) || (!isAdversary && feat[0] == 12) || sum >= command.targetNumber)
+		{
 			if (isExtraordinarySuccess)
 			{
-				result.concat("Extraordinary Success!");
+				result.concat("An Extraordinary Success!");
 			}
 			else if (isGreatSuccess)
 			{
-				result.concat("Great Success!");
+				result.concat("A Great Success!");
 			}
 			else
 			{
-				result.concat("Success!");
+				result.concat("A Success!");
 			}
 		}
 		else
 		{
-			result.concat("Failure!");
+			result.concat("A Failure!");
 		}
 		
 		
