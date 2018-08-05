@@ -88,6 +88,7 @@ public abstract class TorDice extends Command{
 		}
 		else
 		{
+			LOGGER.debug("No success dice to roll, setting the results to an empty array");
 			successDice = new int[0];
 		}
 		
@@ -118,6 +119,8 @@ public abstract class TorDice extends Command{
 		
 		String[] words = command.split(" ");
 		
+		LOGGER.debug("Parsing string: {}", command);
+		
 		/*
 		 * words[0] is either the options w, a|d; or is the number of success dice.
 		 * words[1] is either the numOfSuccess, numOfMastery, +-, modifier, or skillName
@@ -139,6 +142,9 @@ public abstract class TorDice extends Command{
 		
 		for (int i = 0; i < words.length; i++)
 		{
+			LOGGER.debug("Word {} is being parsed.", words[i]);
+			LOGGER.debug("Current possibilities: {}", possibleNext.toString());
+			
 			if (possibleNext.contains(POSSIBLE.OPTIONS))
 			{
 				if (words[i].contains("w"))
@@ -158,6 +164,11 @@ public abstract class TorDice extends Command{
 				// Even if we don't find the options on the first iteration of the loop, remove it from the possible options anyway,
 				// since it's only allowed in the first word.
 				possibleNext.remove(POSSIBLE.OPTIONS);
+				
+				if (result.hasAdvantage || result.hasDisadvantage || result.isWeary)
+				{
+					continue;
+				}
 			}
 			
 			if (possibleNext.contains(POSSIBLE.SUCCESS))
@@ -171,6 +182,7 @@ public abstract class TorDice extends Command{
 					possibleNext.add(POSSIBLE.SIGN);
 					possibleNext.add(POSSIBLE.MODIFIER);
 					possibleNext.add(POSSIBLE.SKILL);
+					continue;
 				}
 				catch (NumberFormatException e)
 				{
@@ -184,7 +196,7 @@ public abstract class TorDice extends Command{
 			
 			if (possibleNext.contains(POSSIBLE.MASTERY))
 			{
-				if (words[i].startsWith("("));
+				if (words[i].startsWith("("))
 				{
 					String mastery = words[i].substring(1, words[i].length() - 1);
 					
@@ -192,6 +204,7 @@ public abstract class TorDice extends Command{
 					{
 						result.numOfMastery = Integer.parseInt(mastery);
 						possibleNext.remove(POSSIBLE.MASTERY);
+						continue;
 					}
 					catch (NumberFormatException e)
 					{
@@ -212,6 +225,8 @@ public abstract class TorDice extends Command{
 					{
 						negativeModifier = true;
 					}
+					
+					continue;
 				}
 			}
 			
@@ -229,6 +244,8 @@ public abstract class TorDice extends Command{
 					possibleNext.remove(POSSIBLE.SIGN);
 					possibleNext.remove(POSSIBLE.MODIFIER);
 					possibleNext.remove(POSSIBLE.MASTERY);
+					
+					continue;
 				}
 				catch (NumberFormatException e)
 				{
@@ -241,9 +258,12 @@ public abstract class TorDice extends Command{
 				if (words[i].matches("^([A-Z]|[a-z])+"))
 				{
 					result.skillName = words[i];
+					haveSkill = true;
 					possibleNext.clear();
 					possibleNext.add(POSSIBLE.GREATER_THAN);
 					possibleNext.add(POSSIBLE.TN);
+					
+					continue;
 				}
 			}
 			
@@ -252,6 +272,22 @@ public abstract class TorDice extends Command{
 				if (words[i].startsWith(">"))
 				{
 					possibleNext.remove(POSSIBLE.GREATER_THAN);
+					
+					if (words[i].length() > 1)
+					{
+						String temp = words[i].substring(1);
+						try
+						{
+							result.targetNumber = Integer.parseInt(temp);
+							possibleNext.clear();
+						}
+						catch (NumberFormatException e)
+						{
+							
+						}
+					}
+					
+					continue;
 				}
 			}
 			
@@ -386,6 +422,8 @@ public abstract class TorDice extends Command{
 			results[i] = fullResults.get(i).intValue();
 		}		
 		
+		LOGGER.debug("Results of success/mastery dice roll: {}", results.toString());
+		
 		return results;
 	}
 	
@@ -405,7 +443,6 @@ public abstract class TorDice extends Command{
 		
 		if (feat.length > 1 && command.hasAdvantage)
 		{
-			
 			sum = Math.max(feat[0], feat[1]);
 		}
 		else if (feat.length > 1 && command.hasDisadvantage)
@@ -419,38 +456,43 @@ public abstract class TorDice extends Command{
 		boolean isGreatSuccess = false;
 		boolean isExtraordinarySuccess = false;
 		
-		result.concat(author.getName());
-		result.concat(" rolled ");
-		result.concat(command.skillName);
-		result.concat(" and got");
-		result.concat(Integer.toString(success.length));
-		result.concat(": ");
-		result.concat(Integer.toString(sum));
+		result = "";
+		result = result.concat(author.getName());
+		if (command.isWeary)
+		{
+			result = result.concat(" wearily");
+		}
+		result = result.concat(" rolled ");
+		result = result.concat(command.skillName);
+		result = result.concat(" and got");
+		//result = result.concat(Integer.toString(success.length));
+		result = result.concat(": ");
+		result = result.concat(Integer.toString(sum));
 		
 		if (command.hasAdvantage)
 		{
-			result.concat(" (");
-			result.concat(Integer.toString(Math.min(feat[0], feat[1])));
-			result.concat(")");
+			result = result.concat(" (");
+			result = result.concat(Integer.toString(Math.min(feat[0], feat[1])));
+			result = result.concat(")");
 		}
 		else if (command.hasDisadvantage)
 		{
-			result.concat(" (");
-			result.concat(Integer.toString(Math.max(feat[0], feat[1])));
-			result.concat(")");
+			result = result.concat(" (");
+			result = result.concat(Integer.toString(Math.max(feat[0], feat[1])));
+			result = result.concat(")");
 		}
 		
 		for (int i = 0; i < success.length; i++)
 		{
 			if (i == command.numOfSuccess)
 			{
-				result.concat(" (");
+				result = result.concat(" (");
 			}
 			else
 			{
-				result.concat(", ");
+				result = result.concat(", ");
 			}
-			result.concat(Integer.toString(success[i]));
+			result = result.concat(Integer.toString(success[i]));
 			
 			if (i >= command.numOfSuccess)
 			{
@@ -480,39 +522,41 @@ public abstract class TorDice extends Command{
 		
 		if (command.numOfMastery > 0)
 		{
-			result.concat(")");
+			result = result.concat(")");
 		}
 		
 		sum += command.modifier;
 		
-		result.concat(". \n");
-		result.concat("Sum = ");
-		result.concat(Integer.toString(sum));
-		result.concat(" and TN = ");
-		result.concat(Integer.toString(command.targetNumber));
-		result.concat(". ");
+		LOGGER.debug("Final sum: {}", sum);
+		
+		result = result.concat(". \n");
+		result = result.concat("Sum = ");
+		result = result.concat(Integer.toString(sum));
+		result = result.concat(" and TN = ");
+		result = result.concat(Integer.toString(command.targetNumber));
+		result = result.concat(". ");
 		
 		if ((isAdversary && feat[0] == 11) || (!isAdversary && feat[0] == 12) || sum >= command.targetNumber)
 		{
 			if (isExtraordinarySuccess)
 			{
-				result.concat("An Extraordinary Success!");
+				result = result.concat("An Extraordinary Success!");
 			}
 			else if (isGreatSuccess)
 			{
-				result.concat("A Great Success!");
+				result = result.concat("A Great Success!");
 			}
 			else
 			{
-				result.concat("A Success!");
+				result = result.concat("A Success!");
 			}
 		}
 		else
 		{
-			result.concat("A Failure!");
+			result = result.concat("A Failure!");
 		}
 		
-		
+		LOGGER.debug("Fully compiled results string: {}", result);
 		return result;
 	}
 
