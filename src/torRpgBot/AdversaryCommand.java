@@ -1,3 +1,18 @@
+/**
+ * <h1>RollCommand Class</h1>
+ * This class extends {@link torRpgBot.TorDice TorDice}, which extends {@link torRpgBot.Command Command}.
+ * The purpose of this command is to handle adversary NPC roll commands.
+ * <p>
+ * This class simply implements the abstract methods {@link torRpgBot.Command#getAliases() getAliases},
+ * {@link torRpgBot.Command#handleCommand(MessageReceivedEvent event) handleCommand},
+ * and {@link torRpgBot.Command#getHelp() getHelp}. Since this is a roll command, this class
+ * also extends {@link torRpgBot.TorDice TorDice}, and the handleCommand function passes most of the work
+ * on to the {@link torRpgBot.TorDice TorDice#handleRollCommand(String command, User author, boolean isAdversary, Guild guild) handleRollCommand}
+ * function, simply passing in the correct boolean to ensure that this is an adversary roll, not a hero roll.
+ * @author Seosaidh
+ * @version 1.1
+ * @since 0.0.2
+ */
 package torRpgBot;
 
 import java.util.ArrayList;
