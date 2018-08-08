@@ -1,3 +1,10 @@
+/**
+ * <h1>TorDice Class (Abstract)</h1
+ * The TorDice class extends the Command class for use in rolling TOR dice. It handles all the common aspects of rolling dice,
+ * but leaves the final selection of whether an adversary is rolling or a hero is rolling to the two subclasses
+ * {@link torRpgBot.RollCommand RollCommand} and {@link torRpgBot.AdversaryCommand AdversaryCommand}.
+ * However, this class handles parsing the roll command body, actually rolling the dice, and building the result string.
+ */
 package torRpgBot;
 
 import java.util.ArrayList;
@@ -28,8 +35,11 @@ public abstract class TorDice extends Command{
 	private static Random rand = new Random();
 	private final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
 	
-	/*
-	 * This class is used to store the results of parsing the command body.
+
+	/**
+	 * This is a private class used solely to store the parsed data from the command body.
+	 * @author Seosaidh
+	 *
 	 */
 	private class CommandResults {
 		public boolean isWeary = false;
@@ -51,17 +61,18 @@ public abstract class TorDice extends Command{
 	/**
 	 * This function is used as the interface to handle all TOR rolling commands.
 	 * The commands will be in the following format:
-	 * [w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]
+	 * {@literal [w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]}
 	 * The fields are as follows:
-	 * 		w: The character is weary
-	 * 		a: The character is rolling with advantage (roll two feat dice and keep the best result)
-	 * 		d: The character is rolling with disadvantage (roll two feat dice and keep the worst result)
+	 * <br>		w: The character is weary
+	 * <br>		a: The character is rolling with advantage (roll two feat dice and keep the best result)
+	 * <br>		d: The character is rolling with disadvantage (roll two feat dice and keep the worst result)
 	 * 	If the number of mastery dice is left out, it is assumed to be 0.
 	 *  If the modifier is left out, it is assumed to be 0.
 	 *  If the TN is left out, it is assumed to be 14.
 	 *  @param command The string containing the roll command.
 	 *  @param author The User variable that contains the author. Currently unused.
 	 *  @param isAdversary Boolean true if the roll is from an adversary, false otherwise.
+	 *  @param guild A Guild object that will, in the future, be used to select which emojis to use for the dice faces
 	 *  @return String containing the result of the roll formatted such as to be ready to send to Discord.
 	 */
 	public String handleRollCommand(String command, User author, boolean isAdversary, Guild guild) {
@@ -314,8 +325,9 @@ public abstract class TorDice extends Command{
 		return result;
 	}
 	
-	/*
+	/**
 	 * This function simply rolls a d12 and returns the integer result.
+	 * @return A random integer between 1 and 12
 	 */
 	private int rolld12() {
 		return rand.nextInt(12) + 1;
@@ -387,8 +399,9 @@ public abstract class TorDice extends Command{
 		}
 	}
 	
-	/*
+	/**
 	 * This function simply rolls a d6 and returns the result as an integer.
+	 * @return int A random integer between 1 and 6.
 	 */
 	private int rolld6() {
 		return rand.nextInt(6) + 1;
