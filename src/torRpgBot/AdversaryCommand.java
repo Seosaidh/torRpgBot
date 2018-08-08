@@ -1,3 +1,18 @@
+/**
+ * <h1>RollCommand Class</h1>
+ * This class extends {@link torRpgBot.TorDice TorDice}, which extends {@link torRpgBot.Command Command}.
+ * The purpose of this command is to handle adversary NPC roll commands.
+ * <p>
+ * This class simply implements the abstract methods {@link torRpgBot.Command#getAliases() getAliases},
+ * {@link torRpgBot.Command#handleCommand(MessageReceivedEvent event) handleCommand},
+ * and {@link torRpgBot.Command#getHelp() getHelp}. Since this is a roll command, this class
+ * also extends {@link torRpgBot.TorDice TorDice}, and the handleCommand function passes most of the work
+ * on to the {@link torRpgBot.TorDice TorDice#handleRollCommand(String command, User author, boolean isAdversary, Guild guild) handleRollCommand}
+ * function, simply passing in the correct boolean to ensure that this is an adversary roll, not a hero roll.
+ * @author Seosaidh
+ * @version 1.1
+ * @since 0.0.2
+ */
 package torRpgBot;
 
 import java.util.ArrayList;
@@ -19,6 +34,13 @@ public class AdversaryCommand extends TorDice {
 		super(flag);
 	}
 
+	/**
+	* This is an override of the {@link torRpgBot.Command#getAliases Command class getAliases} function. 
+	* It simply returns a hard-coded list of command aliases for the Adversary command. The possible aliases
+	* are: "a", "adv", and "adversary". If the first word (less the commandFlag string) matches one of these
+	* strings, then the AdversaryCommand class will handle the event.
+	* @return List of String objects containing the adversary aliases.
+	*/
 	@Override
 	protected List<String> getAliases() {
 		List<String> aliases = new ArrayList<String>();
@@ -28,6 +50,15 @@ public class AdversaryCommand extends TorDice {
 		return aliases;
 	}
 
+	/**
+	* This is an override of the {@link torRpgBot.Command#handleCommand Command class handleCommand} function. 
+	* This function will first pull out the Guild, the User author, and the String message string from the event.
+	* Then, it performs a quick initial check on the command string before passing it (along with the Guild and author)
+	* to the {@link torRpgBot.TorDice#handleRollCommand handleRollCommand} function with the isAdversary parameter
+	* set to true. Once that function returns, this function will check to see if there is a string response to send back
+	* on the Discord channel. If so, it will send this response.
+	* @param event A MessageReceivedEvent class that contains all the information from the Discord event that will be handled by this function
+	*/
 	@Override
 	protected void handleCommand(MessageReceivedEvent event) {
 		String result;
@@ -58,6 +89,10 @@ public class AdversaryCommand extends TorDice {
     	}
 	}
 	
+	/**
+	* This is an override of the {@link torRpgBot.Command#getHelp Command class getHelp} function. 
+	* This function simply returns a hard-coded string that describes the proper way to call the Adversary command.
+	*/
 	@Override
 	protected String getHelp() {
 		return "**Roll Command**\n"

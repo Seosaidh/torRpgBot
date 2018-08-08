@@ -1,3 +1,13 @@
+/**
+ * <h1>torRpgBot</h1>
+ * This is the root class for the torRpgBot package, containing the main function.
+ * The main function simply creates a JDABuilder object, registers all the command listeners,
+ * and then builds the JDA object. In the future, this function will also call the configuration
+ * singleton class to load configuration from a file.
+ * @author Seosaidh
+ * @version 1.0
+ * @since 0.0.1
+ */
 package torRpgBot;
 
 import net.dv8tion.jda.core.AccountType;
@@ -20,6 +30,8 @@ public class torRpgBot {
 
 	public static void main(String[] args) {
 		
+		final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+		
 		// Insert configuration loading here.
 		String flag = "!";
 		
@@ -32,16 +44,15 @@ public class torRpgBot {
             // jdaBuilder.addEventListener(new CommandExtension(flag));
         	jdaBuilder.addEventListener(new RollCommand(flag));
         	jdaBuilder.addEventListener(new AdversaryCommand(flag));
-        	jdaBuilder.addEventListener(new Test());
+        	//jdaBuilder.addEventListener(new Test());
             
             JDA jda = jdaBuilder.buildBlocking();
             
-            final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
             List<Emote> emotes = jda.getEmotes();
             
             for (Emote e : emotes)
             {
-            	LOGGER.debug("Emote name {}, id {} id-long {}", e.getName(), e.getId(), e.getIdLong());
+            	//LOGGER.debug("Emote name {}, id {} id-long {}", e.getName(), e.getId(), e.getIdLong());
             }
         }
         catch (LoginException e)
