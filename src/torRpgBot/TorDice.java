@@ -4,6 +4,9 @@
  * but leaves the final selection of whether an adversary is rolling or a hero is rolling to the two subclasses
  * {@link torRpgBot.RollCommand RollCommand} and {@link torRpgBot.AdversaryCommand AdversaryCommand}.
  * However, this class handles parsing the roll command body, actually rolling the dice, and building the result string.
+ * @author Seosaidh
+ * @version 1.1
+ * @since 0.0.2
  */
 package torRpgBot;
 
