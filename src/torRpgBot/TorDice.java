@@ -24,6 +24,11 @@ import net.dv8tion.jda.core.entities.User;
 
 public abstract class TorDice extends Command{
 	
+	public interface torDiceInterface {
+		public int rolld6();
+		public int rolld12();
+	}
+	
 	enum POSSIBLE{
 		OPTIONS,
 		SUCCESS,
@@ -35,8 +40,8 @@ public abstract class TorDice extends Command{
 		TN
 	}
 	
-	private static Random rand = new Random();
-	private final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+	private torDiceInterface diceProvider;
+	private final Logger LOGGER = LogManager.getLogger(TorDice.class.getName());
 	
 
 	/**
@@ -56,8 +61,9 @@ public abstract class TorDice extends Command{
 		public String skillName = "";
 	}
 	
-	public TorDice(String flag) {
+	public TorDice(String flag, torDiceInterface dice) {
 		super(flag);
+		diceProvider = dice;
 	}
 
 	
@@ -328,13 +334,6 @@ public abstract class TorDice extends Command{
 		return result;
 	}
 	
-	/**
-	 * This function simply rolls a d12 and returns the integer result.
-	 * @return A random integer between 1 and 12
-	 */
-	private int rolld12() {
-		return rand.nextInt(12) + 1;
-	}
 	
 	/**
 	 * This function will handle rolling the feat die and returning the integer result.
@@ -349,8 +348,8 @@ public abstract class TorDice extends Command{
 	 */
 	private int[] rollFeat(CommandResults command, boolean isAdversary) {
 		int roll1, roll2;
-		roll1 = rolld12();
-		roll2 = rolld12();
+		roll1 = diceProvider.rolld12();
+		roll2 = diceProvider.rolld12();
 		
 		LOGGER.debug("The first d12 rolled came up {} and the second {}", roll1, roll2);
 		
@@ -402,13 +401,6 @@ public abstract class TorDice extends Command{
 		}
 	}
 	
-	/**
-	 * This function simply rolls a d6 and returns the result as an integer.
-	 * @return int A random integer between 1 and 6.
-	 */
-	private int rolld6() {
-		return rand.nextInt(6) + 1;
-	}
 	
 	
 	/**
@@ -425,7 +417,7 @@ public abstract class TorDice extends Command{
 		
 		for (int i = 0; i < (numOfSuccess + numOfMastery); i++)
 		{
-			fullResults.add(new Integer(rolld6()));
+			fullResults.add(new Integer(diceProvider.rolld6()));
 		}
 		
 		Collections.sort(fullResults, Collections.reverseOrder());

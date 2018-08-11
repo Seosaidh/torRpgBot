@@ -33,5 +33,10 @@
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/jackson/jackson-annotations-2.9.6-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/testNG/testng-7.0.0-20180809.090204-34.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/testNG/testng-7.0.0-20180809.090204-34-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/testNG/testng-7.0.0-20180809.090204-34-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
