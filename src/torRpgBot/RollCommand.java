@@ -65,7 +65,7 @@ public class RollCommand extends TorDice{
 		String result;
 		String command = event.getMessage().getContentDisplay().trim();
 		Guild guild = event.getGuild();
-		User author = event.getAuthor();
+		String author;
 		MessageChannel channel = event.getChannel();
 		
 		String[] temp = command.split(" ", 2);
@@ -77,6 +77,15 @@ public class RollCommand extends TorDice{
 			LOGGER.error(output);
 			channel.sendMessage(output).queue();
 			return;
+		}
+		
+		if (event.getMessage().isWebhookMessage())
+		{
+			author = event.getAuthor().getName();
+		}
+		else
+		{
+			author = event.getMember().getEffectiveName();
 		}
 
 		command = temp[1];		

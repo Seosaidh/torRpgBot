@@ -88,7 +88,7 @@ public abstract class TorDice extends Command{
 	 *  @param guild A Guild object that will, in the future, be used to select which emojis to use for the dice faces
 	 *  @return String containing the result of the roll formatted such as to be ready to send to Discord.
 	 */
-	public String handleRollCommand(String command, User author, boolean isAdversary, Guild guild) {
+	public String handleRollCommand(String command, String author, boolean isAdversary, Guild guild) {
 
 		CommandResults parsedCommand = parseCommandString(command);
 		int[] successDice;
@@ -456,9 +456,14 @@ public abstract class TorDice extends Command{
 	 * @param author The User structure for the user who sent the command.
 	 * @return String to be sent to Discord describing the roll and the result.
 	 */
-	/* private -> testing*/ String compileResult(int[] feat, int[] success, boolean isAdversary, CommandResults command, User author) {
-		String result = new String();
+	/* private -> testing*/ String compileResult(int[] feat, int[] success, boolean isAdversary, CommandResults command, String author) {
+		String result = author;
+		// Final String: NAME [wearily] rolled SKILL and got: FEAT; SUCCESS1, SUCCESS2, ... = SUM >|< TN A [Great|Extraordinary] Success!\n Unused dice: unusedFeat, mastery
 		int sum = 0;
+		String featString = "";
+		String successString = "";
+		String unusedFeat = "";
+		String mastery = "";
 		
 		if (feat.length > 1 && command.hasAdvantage)
 		{
@@ -472,46 +477,30 @@ public abstract class TorDice extends Command{
 		{
 			sum = feat[0];
 		}
+		
+		featString = Integer.toString(sum);
 		boolean isGreatSuccess = false;
 		boolean isExtraordinarySuccess = false;
 		
-		result = "";
-		result = result.concat(author.getName());
-		if (command.isWeary)
-		{
-			result = result.concat(" wearily");
-		}
-		result = result.concat(" rolled ");
-		result = result.concat(command.skillName);
-		result = result.concat(" and got");
-		//result = result.concat(Integer.toString(success.length));
-		result = result.concat(": ");
-		result = result.concat(Integer.toString(sum));
-		
 		if (command.hasAdvantage)
 		{
-			result = result.concat(" (");
-			result = result.concat(Integer.toString(Math.min(feat[0], feat[1])));
-			result = result.concat(")");
+			unusedFeat = (Integer.toString(Math.min(feat[0], feat[1])));
 		}
 		else if (command.hasDisadvantage)
 		{
-			result = result.concat(" (");
-			result = result.concat(Integer.toString(Math.max(feat[0], feat[1])));
-			result = result.concat(")");
+			unusedFeat = result.concat(Integer.toString(Math.max(feat[0], feat[1])));
 		}
 		
 		for (int i = 0; i < success.length; i++)
 		{
-			if (i == command.numOfSuccess)
+			if (i >= command.numOfSuccess)
 			{
-				result = result.concat(" (");
+				mastery = mastery.concat(", " + Integer.toString(success[i]));
 			}
 			else
 			{
-				result = result.concat(", ");
+				successString = successString.concat(", " + Integer.toString(success[i]));
 			}
-			result = result.concat(Integer.toString(success[i]));
 			
 			if (i >= command.numOfSuccess)
 			{
@@ -539,40 +528,76 @@ public abstract class TorDice extends Command{
 			}
 		}
 		
+		if (command.numOfSuccess > 0)
+		{
+			successString = successString.substring(2);
+		}
+		
 		if (command.numOfMastery > 0)
 		{
-			result = result.concat(")");
+			mastery = mastery.substring(2);
 		}
 		
 		sum += command.modifier;
 		
+		
 		LOGGER.debug("Final sum: {}", sum);
 		
-		result = result.concat(". \n");
-		result = result.concat("Sum = ");
+		if (command.isWeary)
+		{
+			result = result.concat(" wearily");
+		}
+		result = result.concat(" rolled ");
+		result = result.concat(command.skillName);
+		result = result.concat(" and got");
+		result = result.concat(": ");
+		result = result.concat(featString);
+		result = result.concat("; ");
+		result = result.concat(successString);
+		result = result.concat(" = ");
 		result = result.concat(Integer.toString(sum));
-		result = result.concat(" and TN = ");
+		if (sum >= command.targetNumber)
+		{
+			result = result.concat(" > ");
+		}
+		else
+		{
+			result = result.concat(" < ");
+		}
 		result = result.concat(Integer.toString(command.targetNumber));
-		result = result.concat(". ");
+		result = result.concat("; ");
 		
 		if ((isAdversary && feat[0] == 11) || (!isAdversary && feat[0] == 12) || sum >= command.targetNumber)
 		{
 			if (isExtraordinarySuccess)
 			{
-				result = result.concat("An Extraordinary Success!");
+				result = result.concat("an Extraordinary Success!");
 			}
 			else if (isGreatSuccess)
 			{
-				result = result.concat("A Great Success!");
+				result = result.concat("a Great Success!");
 			}
 			else
 			{
-				result = result.concat("A Success!");
+				result = result.concat("a Success!");
 			}
 		}
 		else
 		{
-			result = result.concat("A Failure!");
+			result = result.concat("a Failure!");
+		}
+		
+		result = result.concat("\n");
+		result = result.concat("Unused dice: ");
+		
+		if (command.hasAdvantage || command.hasDisadvantage)
+		{
+			result = result.concat(unusedFeat + "; ");
+		}
+		
+		if (command.numOfMastery > 0)
+		{
+			result = result.concat(mastery);
 		}
 		
 		LOGGER.debug("Fully compiled results string: {}", result);
