@@ -680,6 +680,11 @@ public abstract class TorDice extends Command{
 		String mastery = "";
 		int finalFeatResult = 0;
 		
+		if (isAdversary)
+		{
+			result = "The Enemy";
+		}
+		
 		if (feat.length > 1 && command.hasAdvantage)
 		{
 			finalFeatResult = sum = Math.max(feat[0], feat[1]);
