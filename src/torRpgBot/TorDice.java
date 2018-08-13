@@ -13,8 +13,6 @@ package torRpgBot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,6 +21,11 @@ import net.dv8tion.jda.core.entities.User;
 
 
 public abstract class TorDice extends Command{
+	
+	public interface torDiceInterface {
+		public int rolld6();
+		public int rolld12();
+	}
 	
 	enum POSSIBLE{
 		OPTIONS,
@@ -35,8 +38,8 @@ public abstract class TorDice extends Command{
 		TN
 	}
 	
-	private static Random rand = new Random();
-	private final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+	private torDiceInterface diceProvider;
+	private final Logger LOGGER = LogManager.getLogger(TorDice.class.getName());
 	
 
 	/**
@@ -44,7 +47,7 @@ public abstract class TorDice extends Command{
 	 * @author Seosaidh
 	 *
 	 */
-	private class CommandResults {
+	class CommandResults {
 		public boolean isWeary = false;
 		public boolean hasAdvantage = false;
 		public boolean hasDisadvantage = false;
@@ -54,10 +57,17 @@ public abstract class TorDice extends Command{
 		public int modifier = 0;
 		public int targetNumber = 14;
 		public String skillName = "";
+		
+		public String toString() {
+			return "isWeary: " + isWeary + ", hasAdvantage: " + hasAdvantage + ", hasDisadvantage: " + hasDisadvantage +
+					", parseSuccessful: " + parseSuccessful + ", numOfSucces: " + numOfSuccess + ", numOfMastery: " +
+					numOfMastery + ", modifier: " + modifier + ", targetNumber: " + targetNumber + ", skillName: " + skillName;
+		}
 	}
 	
-	public TorDice(String flag) {
+	public TorDice(String flag, torDiceInterface dice) {
 		super(flag);
+		diceProvider = dice;
 	}
 
 	
@@ -117,7 +127,7 @@ public abstract class TorDice extends Command{
 	 * @param command The string containing the command body, which should conform to the syntax above.
 	 * @return A CommandResults structure containing the results of the parsed command. In particular, the parseSuccessful field will only be true if we successfully parse out a numberOfSuccess and skillName.
 	 */
-	private CommandResults parseCommandString(String command) {
+	/* private -> testing*/ CommandResults parseCommandString(String command) {
 
 		CommandResults result = new CommandResults();
 		
@@ -170,9 +180,16 @@ public abstract class TorDice extends Command{
 				{
 					result.hasAdvantage = true;
 				}
-				else if (words[i].contains("d"))
+				
+				if (words[i].contains("d"))
 				{
 					result.hasDisadvantage = true;
+				}
+				
+				if (result.hasAdvantage && result.hasDisadvantage)
+				{
+					LOGGER.error("Bad Command. Both advantage and disadvantage were set.");
+					return result;
 				}
 				
 				// Even if we don't find the options on the first iteration of the loop, remove it from the possible options anyway,
@@ -328,13 +345,6 @@ public abstract class TorDice extends Command{
 		return result;
 	}
 	
-	/**
-	 * This function simply rolls a d12 and returns the integer result.
-	 * @return A random integer between 1 and 12
-	 */
-	private int rolld12() {
-		return rand.nextInt(12) + 1;
-	}
 	
 	/**
 	 * This function will handle rolling the feat die and returning the integer result.
@@ -347,10 +357,10 @@ public abstract class TorDice extends Command{
 	 * @param isAdversary Boolean true if the roll is performed by an adversary, false otherwise.
 	 * @return An int array containing the roll results. Also 0 for the appropriate roll (EoS/GRune). -1 on Error.
 	 */
-	private int[] rollFeat(CommandResults command, boolean isAdversary) {
+	/* private -> testing*/ int[] rollFeat(CommandResults command, boolean isAdversary) {
 		int roll1, roll2;
-		roll1 = rolld12();
-		roll2 = rolld12();
+		roll1 = diceProvider.rolld12();
+		roll2 = diceProvider.rolld12();
 		
 		LOGGER.debug("The first d12 rolled came up {} and the second {}", roll1, roll2);
 		
@@ -402,13 +412,6 @@ public abstract class TorDice extends Command{
 		}
 	}
 	
-	/**
-	 * This function simply rolls a d6 and returns the result as an integer.
-	 * @return int A random integer between 1 and 6.
-	 */
-	private int rolld6() {
-		return rand.nextInt(6) + 1;
-	}
 	
 	
 	/**
@@ -419,13 +422,13 @@ public abstract class TorDice extends Command{
 	 * @param numOfMastery Number of mastery dice to roll.
 	 * @return integer array containing the results of all dice rolled in descending order.
 	 */
-	private int[] rollSuccess(int numOfSuccess, int numOfMastery) {
+	/* private -> testing*/ int[] rollSuccess(int numOfSuccess, int numOfMastery) {
 		int[] results = new int[numOfSuccess + numOfMastery];
 		List<Integer> fullResults = new ArrayList<Integer>(numOfSuccess + numOfMastery);
 		
 		for (int i = 0; i < (numOfSuccess + numOfMastery); i++)
 		{
-			fullResults.add(new Integer(rolld6()));
+			fullResults.add(new Integer(diceProvider.rolld6()));
 		}
 		
 		Collections.sort(fullResults, Collections.reverseOrder());
@@ -453,7 +456,7 @@ public abstract class TorDice extends Command{
 	 * @param author The User structure for the user who sent the command.
 	 * @return String to be sent to Discord describing the roll and the result.
 	 */
-	private String compileResult(int[] feat, int[] success, boolean isAdversary, CommandResults command, User author) {
+	/* private -> testing*/ String compileResult(int[] feat, int[] success, boolean isAdversary, CommandResults command, User author) {
 		String result = new String();
 		int sum = 0;
 		

@@ -31,6 +31,7 @@ public class torRpgBot {
 	public static void main(String[] args) {
 		
 		final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+		DiceProvider dice = new DiceProvider();
 		
 		// Insert configuration loading here.
 		String flag = "!";
@@ -42,8 +43,8 @@ public class torRpgBot {
 
             // Insert command registration here. Each command class needs to be registered by calling
             // jdaBuilder.addEventListener(new CommandExtension(flag));
-        	jdaBuilder.addEventListener(new RollCommand(flag));
-        	jdaBuilder.addEventListener(new AdversaryCommand(flag));
+        	jdaBuilder.addEventListener(new RollCommand(flag, dice));
+        	jdaBuilder.addEventListener(new AdversaryCommand(flag, dice));
         	//jdaBuilder.addEventListener(new Test());
             
             JDA jda = jdaBuilder.buildBlocking();

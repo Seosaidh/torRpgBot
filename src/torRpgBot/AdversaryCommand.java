@@ -28,10 +28,10 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class AdversaryCommand extends TorDice {
 	
-	private final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
+	private final Logger LOGGER = LogManager.getLogger(AdversaryCommand.class.getName());
 	
-	public AdversaryCommand (String flag) {
-		super(flag);
+	public AdversaryCommand (String flag, torDiceInterface dice) {
+		super(flag, dice);
 	}
 
 	/**
