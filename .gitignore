@@ -27,3 +27,5 @@ exampleCode.txt
 docs/
 
 test-output/
+
+src/log4j2\.xml_back
