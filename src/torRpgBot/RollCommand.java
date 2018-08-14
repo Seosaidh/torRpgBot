@@ -105,7 +105,7 @@ public class RollCommand extends TorDice{
 	*/
 	@Override
 	protected String getHelp() {
-		return "**Roll Command**\n"
+		return "__**Roll Command**__\n"
 				+ "**Aliases:** roll, r\n"
 				+ "**Syntax:** command [w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]\n"
 				+ "**Description:** This command will a roll for a companion in TOR. It will roll NUM_OF_SUCCESS_DICE plus a feat "

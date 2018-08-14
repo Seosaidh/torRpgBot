@@ -103,7 +103,7 @@ public class AdversaryCommand extends TorDice {
 	*/
 	@Override
 	protected String getHelp() {
-		return "**Roll Command**\n"
+		return "__**Adversary Command**__\n"
 				+ "**Aliases:** adversary, adv, a\n"
 				+ "**Syntax:** command [w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]\n"
 				+ "**Description:** This command will a roll for an adversary in TOR. It will roll NUM_OF_SUCCESS_DICE plus a feat "
