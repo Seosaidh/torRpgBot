@@ -13,14 +13,7 @@ package torRpgBot;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.*;
-
-
 import javax.security.auth.login.LoginException;
-import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 
@@ -30,7 +23,6 @@ public class torRpgBot {
 
 	public static void main(String[] args) {
 		
-		final Logger LOGGER = LogManager.getLogger(torRpgBot.class.getName());
 		DiceProvider dice = new DiceProvider();
 		
 		// Insert configuration loading here.
@@ -48,14 +40,9 @@ public class torRpgBot {
         	jdaBuilder.addEventListener(helpCommand.registerCommand(new RollCommand(flag, dice)));
         	jdaBuilder.addEventListener(helpCommand.registerCommand(new AdversaryCommand(flag, dice)));
             
-            JDA jda = jdaBuilder.buildBlocking();
+            @SuppressWarnings("unused")
+			JDA jda = jdaBuilder.buildBlocking();
             
-            List<Emote> emotes = jda.getEmotes();
-            
-            for (Emote e : emotes)
-            {
-            	//LOGGER.debug("Emote name {}, id {} id-long {}", e.getName(), e.getId(), e.getIdLong());
-            }
         }
         catch (LoginException e)
         {
