@@ -5,7 +5,7 @@
  * {@link torRpgBot.RollCommand RollCommand} and {@link torRpgBot.AdversaryCommand AdversaryCommand}.
  * However, this class handles parsing the roll command body, actually rolling the dice, and building the result string.
  * @author Seosaidh
- * @version 1.1
+ * @version 2.0
  * @since 0.0.2
  */
 package torRpgBot;
@@ -18,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 
 import net.dv8tion.jda.core.entities.Emote;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.User;
 
 
 public abstract class TorDice extends Command{
@@ -400,9 +399,17 @@ public abstract class TorDice extends Command{
 			{
 				if (words[i].matches("^([A-Z]|[a-z])+"))
 				{
-					result.skillName = words[i];
+					if (haveSkill)
+					{
+						result.skillName = result.skillName.concat(" " + words[i]);
+					}
+					else
+					{
+						result.skillName = words[i];
+					}
 					haveSkill = true;
 					possibleNext.clear();
+					possibleNext.add(POSSIBLE.SKILL);
 					possibleNext.add(POSSIBLE.GREATER_THAN);
 					possibleNext.add(POSSIBLE.TN);
 					
@@ -415,6 +422,7 @@ public abstract class TorDice extends Command{
 				if (words[i].startsWith(">"))
 				{
 					possibleNext.remove(POSSIBLE.GREATER_THAN);
+					possibleNext.remove(POSSIBLE.SKILL);
 					
 					if (words[i].length() > 1)
 					{
@@ -454,6 +462,7 @@ public abstract class TorDice extends Command{
 			result.parseSuccessful = true;
 		}
 		
+		LOGGER.debug("Parsed Results = {}", result.toString());
 		return result;
 	}
 	
@@ -552,8 +561,7 @@ public abstract class TorDice extends Command{
 		{
 			results[i] = fullResults.get(i).intValue();
 		}		
-		
-		LOGGER.debug("Results of success/mastery dice roll: {}", results.toString());
+			
 		
 		return results;
 	}
@@ -774,6 +782,20 @@ public abstract class TorDice extends Command{
 		result = result.concat(featString);
 		result = result.concat("; ");
 		result = result.concat(successString);
+		
+		if (command.modifier != 0)
+		{
+			if (command.modifier > 0)
+			{
+				result = result.concat(" + ");
+			}
+			else
+			{
+				result = result.concat(" - ");
+			}
+			result = result.concat(Integer.toString(Math.abs(command.modifier)));
+		}
+		
 		result = result.concat(" = ");
 		result = result.concat(Integer.toString(sum));
 		if (sum >= command.targetNumber)
@@ -807,7 +829,7 @@ public abstract class TorDice extends Command{
 			result = result.concat("a Failure!");
 		}
 		
-		if (command.hasAdvantage || command.hasAdvantage || command.numOfMastery > 0)
+		if (command.hasAdvantage || command.hasDisadvantage || command.numOfMastery > 0)
 		{
 			result = result.concat("\n");
 			result = result.concat("Unused dice: ");

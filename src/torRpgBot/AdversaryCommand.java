@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class AdversaryCommand extends TorDice {
