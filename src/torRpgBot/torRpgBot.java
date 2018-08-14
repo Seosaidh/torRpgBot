@@ -24,6 +24,9 @@ public class torRpgBot {
 	public static void main(String[] args) {
 		
 		DiceProvider dice = new DiceProvider();
+		SettingsManager settingsManager = new SettingsManager();
+		
+		settingsManager.loadSettings("torRpgBotSettings.json");
 		
 		// Insert configuration loading here.
 		String flag = "!";
@@ -31,7 +34,8 @@ public class torRpgBot {
         try
         {
         	JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT)
-                    .setToken("READACTED");//The token of the account that is logging in.
+                    .setToken(settingsManager.getSettings().botToken);
+        	
         	HelpCommand helpCommand = new HelpCommand(flag);
 
             // Insert command registration here. Each command class needs to be registered by calling

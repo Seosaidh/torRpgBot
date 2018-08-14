@@ -35,5 +35,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.testng.TESTNG_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/gson/gson-2.8.5.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/gson/gson-2.8.5-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Joseph/Documents/torRpgBot/gson/gson-2.8.5-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
