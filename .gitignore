@@ -12,6 +12,7 @@
 
 # Package Files #
 *.jar
+!**/bin/*.jar
 *.war
 *.nar
 *.ear
@@ -21,7 +22,7 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-/bin/
+/bin/torRpgBot/*
 
 exampleCode.txt
 docs/
@@ -33,3 +34,5 @@ src/log4j2\.xml_back
 torRpgBotSettings\.json
 
 torRpgBotSettings\.json_old
+
+bin/log4j2\.xml_back
