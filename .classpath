@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" output="test-output" path="test">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Users/Joseph/Documents/torRpgBot/torRpgBot/lib/JDA-3.7.1_385-withDependencies.jar" sourcepath="C:/Users/Joseph/Documents/torRpgBot/torRpgBot/lib/JDA-3.7.1_385-sources.jar">
 		<attributes>

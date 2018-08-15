@@ -1,13 +1,11 @@
 package torRpgBot;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import torRpgBot.TorDice.CommandResults;
 import torRpgBot.TorDice.torDiceInterface;
