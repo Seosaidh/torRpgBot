@@ -29,7 +29,7 @@ public class RollCommand extends TorDice{
 	
 	private final Logger LOGGER = LogManager.getLogger(RollCommand.class.getName());
 	
-	public RollCommand(String flag, torDiceInterface dice) {
+	public RollCommand(List<CommandFlag> flag, torDiceInterface dice) {
 		super(flag, dice);
 	}
 
@@ -72,7 +72,7 @@ public class RollCommand extends TorDice{
 		if (temp.length < 2)
 		{
 			String output = "Invalid roll command. No command body is present. Please use the following syntax: " +
-					getFlag() + "roll [w][a|d] NUM_OF_SUCCESS [(NUM_OF_MASTERY)] [+|- MODIFIER] SKILL_NAME [> TN]";
+					getFlag(event.getGuild().getName()) + "roll [w][a|d] NUM_OF_SUCCESS [(NUM_OF_MASTERY)] [+|- MODIFIER] SKILL_NAME [> TN]";
 			LOGGER.error(output);
 			channel.sendMessage(output).queue();
 			return;

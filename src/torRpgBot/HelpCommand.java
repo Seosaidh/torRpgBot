@@ -24,7 +24,7 @@ public class HelpCommand extends Command {
 	
 	List<Command> commandObjects = new LinkedList<Command>();
 
-	public HelpCommand(String flag) {
+	public HelpCommand(List<CommandFlag> flag) {
 		super(flag);
 	}
 	

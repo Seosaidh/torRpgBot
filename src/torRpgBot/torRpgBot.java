@@ -28,21 +28,18 @@ public class torRpgBot {
 		
 		settingsManager.loadSettings("torRpgBotSettings.json");
 		
-		// Insert configuration loading here.
-		String flag = "!";
-		
         try
         {
         	JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT)
                     .setToken(settingsManager.getSettings().botToken);
         	
-        	HelpCommand helpCommand = new HelpCommand(flag);
+        	HelpCommand helpCommand = new HelpCommand(settingsManager.getSettings().commandFlags);
 
             // Insert command registration here. Each command class needs to be registered by calling
             // jdaBuilder.addEventListener(helpCommand.registerCommand(new CommandExtension(flag)));
         	jdaBuilder.addEventListener(helpCommand);
-        	jdaBuilder.addEventListener(helpCommand.registerCommand(new RollCommand(flag, dice)));
-        	jdaBuilder.addEventListener(helpCommand.registerCommand(new AdversaryCommand(flag, dice)));
+        	jdaBuilder.addEventListener(helpCommand.registerCommand(new RollCommand(settingsManager.getSettings().commandFlags, dice)));
+        	jdaBuilder.addEventListener(helpCommand.registerCommand(new AdversaryCommand(settingsManager.getSettings().commandFlags, dice)));
             
             @SuppressWarnings("unused")
 			JDA jda = jdaBuilder.buildBlocking();

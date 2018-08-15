@@ -21,7 +21,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public abstract class Command extends ListenerAdapter {
 	
-	private static String commandFlag;
+	private static List<CommandFlag> commandFlags;
 	
 	/**
 	 * This is the abstract function that must be defined by the subclasses in order to personalize a response to the event.
@@ -47,16 +47,32 @@ public abstract class Command extends ListenerAdapter {
 	 * The class constructor. The only parameter is used to set the command flag.
 	 * @param flag A string that is set as the commandFlag member variable.
 	 */
-	public Command (String flag) {
-		commandFlag = flag;
+	public Command (List<CommandFlag> flags) {
+		commandFlags = flags;
 	}
 	
 	/**
 	 * This function returns the commandFlag variable, which is used to decide if a message is a command or not.
 	 * @return String containing the command flag.
 	 */
-	public String getFlag() {
-		return commandFlag;
+	public List<CommandFlag> getFlags() {
+		return commandFlags;
+	}
+	
+	public String getFlag(String server) {
+		String defaultFlag = "!";
+		for (CommandFlag cf : commandFlags)
+		{
+			if (cf.server.equalsIgnoreCase(server))
+			{
+				return cf.commandFlag;
+			}
+			else if (cf.server.equalsIgnoreCase("default"))
+			{
+				defaultFlag = cf.commandFlag;
+			}
+		}
+		return defaultFlag;
 	}
 	
 	/**
@@ -64,8 +80,8 @@ public abstract class Command extends ListenerAdapter {
 	 * share a single instance of commandFlag. Only one subclass should actually call this function.
 	 * @param flag String used to set the commandFlag member variable.
 	 */
-	protected void setFlag(String flag) {
-		commandFlag = flag;
+	protected void setFlags(List<CommandFlag> flag) {
+		commandFlags = flag;
 	}
 	
 	/**
@@ -80,14 +96,14 @@ public abstract class Command extends ListenerAdapter {
 	 */
 	@Override
     public void onMessageReceived(MessageReceivedEvent event) {
-		
+		String flag = getFlag(event.getGuild().getName());
 		if (event.getAuthor().isBot() || !event.isFromType(ChannelType.TEXT) ||
-				!event.getMessage().getContentDisplay().trim().startsWith(commandFlag))
+				!event.getMessage().getContentDisplay().trim().startsWith(flag))
 		{
 			return;
 		}
 		
-		if (getAliases().contains(event.getMessage().getContentDisplay().trim().toLowerCase().split(" ")[0].substring(commandFlag.length())))
+		if (getAliases().contains(event.getMessage().getContentDisplay().trim().toLowerCase().split(" ")[0].substring(flag.length())))
 		{
 			handleCommand(event);
 		}

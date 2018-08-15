@@ -89,7 +89,7 @@ public abstract class TorDice extends Command{
 		public String d63weary = "3";
 	}
 	
-	public TorDice(String flag, torDiceInterface dice) {
+	public TorDice(List<CommandFlag> flag, torDiceInterface dice) {
 		super(flag);
 		diceProvider = dice;
 	}

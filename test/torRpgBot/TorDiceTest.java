@@ -1,5 +1,7 @@
 package torRpgBot;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.testng.Assert;
@@ -51,7 +53,7 @@ public class TorDiceTest {
 	
 	private class TestClass extends TorDice {
 
-		public TestClass(String flag, torDiceInterface dice) {
+		public TestClass(List<CommandFlag> flag, torDiceInterface dice) {
 			super(flag, dice);
 		}
 
@@ -87,7 +89,9 @@ public class TorDiceTest {
 	}
 	
 	public TestDice diceProvider = new TestDice(new int[] {1}, new int[] {1});
-	public TestClass testClass = new TestClass("!", diceProvider);
+	public List<CommandFlag> tempList = new ArrayList<CommandFlag>();
+	private CommandFlag cf = new CommandFlag();
+	public TestClass testClass = new TestClass(tempList, diceProvider);
 	
 	
 

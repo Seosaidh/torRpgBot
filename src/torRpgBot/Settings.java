@@ -1,3 +1,9 @@
+/**
+ * <h1>Settings</h1>
+ * This is a relatively simple container class for all of the settings available
+ * to the bot.
+ */
+
 package torRpgBot;
 
 import java.util.ArrayList;
