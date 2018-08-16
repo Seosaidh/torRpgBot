@@ -35,3 +35,8 @@ torRpgBotSettings\.json
 torRpgBotSettings\.json_old
 
 runnableJar/
+
+
+.classpath
+.project
+oathURL.txt
