@@ -33,3 +33,5 @@ src/log4j2\.xml_back
 torRpgBotSettings\.json
 
 torRpgBotSettings\.json_old
+
+runnableJar/
