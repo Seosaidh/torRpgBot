@@ -87,13 +87,16 @@ public class RollCommand extends TorDice{
 			author = event.getMember().getEffectiveName();
 		}
 
-		command = temp[1];		
+		command = temp[1];
+		
+		LOGGER.info("Processing roll command received on channel {} on server {} from user {} with body {}.",
+				channel.getName(), guild.getName(), author, command);
 
 		result = handleRollCommand(command, author, false, guild);
 		
     	if (!result.isEmpty())
     	{
-    		LOGGER.debug("Sending message {} to channel {}", result, channel.getName());
+    		LOGGER.info("Sending message {} to channel {}", result, channel.getName());
     		channel.sendMessage(result).queue();
     	}
 	}

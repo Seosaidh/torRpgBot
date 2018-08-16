@@ -128,6 +128,8 @@ public abstract class TorDice extends Command{
 					+ "`[w][a|d] NUM_OF_SUCCESS_DICE [(NUM_OF_MASTERY_DICE)] [+|- MODIFIER] SKILL_NAME [> TN]`";
 		}
 		
+		LOGGER.debug("Parsed Command: {}.", parsedCommand.toString());
+		
 		feat = rollFeat(parsedCommand, isAdversary);
 		
 		if(parsedCommand.numOfSuccess > 0)
@@ -553,6 +555,8 @@ public abstract class TorDice extends Command{
 		}
 		
 		Collections.sort(fullResults, Collections.reverseOrder());
+		
+		LOGGER.debug("Full results from success/mastery roll: {}.", fullResults.toString());
 
 		// I originally was only going to show the results of the relevant success dice, but decided to show
 		// the results of the mastery dice as well. If you want to only show the success dice, remove the

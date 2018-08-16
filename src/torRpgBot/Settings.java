@@ -20,7 +20,7 @@ public class Settings {
 	}
 	
 	public String toString() {
-		String result = "botToken=" + botToken;
+		String result = "Settings Object: botToken=" + botToken;
 		
 		for (CommandFlag flag : commandFlags)
 		{
