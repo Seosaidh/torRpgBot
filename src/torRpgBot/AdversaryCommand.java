@@ -29,8 +29,8 @@ public class AdversaryCommand extends TorDice {
 	
 	private final Logger LOGGER = LogManager.getLogger(AdversaryCommand.class.getName());
 	
-	public AdversaryCommand (List<CommandFlag> flag, torDiceInterface dice) {
-		super(flag, dice);
+	public AdversaryCommand (List<CommandFlag> flag, torDiceInterface dice, EmoteInterface emoteProvider) {
+		super(flag, dice, emoteProvider);
 	}
 
 	/**

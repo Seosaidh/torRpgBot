@@ -25,6 +25,8 @@ public class torRpgBot {
 		
 		DiceProvider dice = new DiceProvider();
 		SettingsManager settingsManager = new SettingsManager();
+		EmoteInterface emoteRollProvider = new EmoteStrings();
+		EmoteInterface emoteAdversaryProvider = new EmoteStrings();
 		
 		settingsManager.loadSettings("torRpgBotSettings.json");
 		
@@ -38,8 +40,8 @@ public class torRpgBot {
             // Insert command registration here. Each command class needs to be registered by calling
             // jdaBuilder.addEventListener(helpCommand.registerCommand(new CommandExtension(flag)));
         	jdaBuilder.addEventListener(helpCommand);
-        	jdaBuilder.addEventListener(helpCommand.registerCommand(new RollCommand(settingsManager.getSettings().commandFlags, dice)));
-        	jdaBuilder.addEventListener(helpCommand.registerCommand(new AdversaryCommand(settingsManager.getSettings().commandFlags, dice)));
+        	jdaBuilder.addEventListener(helpCommand.registerCommand(new RollCommand(settingsManager.getSettings().commandFlags, dice, emoteRollProvider)));
+        	jdaBuilder.addEventListener(helpCommand.registerCommand(new AdversaryCommand(settingsManager.getSettings().commandFlags, dice, emoteAdversaryProvider)));
             
             @SuppressWarnings("unused")
 			JDA jda = jdaBuilder.buildBlocking();

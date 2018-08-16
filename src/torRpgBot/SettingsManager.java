@@ -9,14 +9,14 @@ package torRpgBot;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.testng.reporters.Files;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +31,9 @@ public class SettingsManager {
 		builder.setPrettyPrinting();
 		builder.serializeNulls();
 		Gson gson = builder.create();
-		return gson.toJson(settingsObject);
+		String result = gson.toJson(settingsObject);
+		LOGGER.debug("Converted object {} to JSON {}.", settingsObject.toString(), result);
+		return result;
 	}
 	
 	
@@ -41,6 +43,7 @@ public class SettingsManager {
 		builder.serializeNulls();
 		Gson gson = builder.create();
 		Settings newSettings = gson.fromJson(json, Settings.class);
+		LOGGER.debug("Converted JSON {} to object {}.", json, newSettings.toString());
 		return newSettings;
 	}
 	
@@ -53,11 +56,11 @@ public class SettingsManager {
 	 * @return boolean true if successfully loaded settings, false otherwise.
 	 */
 	public boolean loadSettings(String filename) {
-		try {
-			FileReader fileReader = new FileReader(filename);
-			BufferedReader reader = new BufferedReader(fileReader);
+		try (BufferedReader reader = new BufferedReader(new FileReader(filename))){
 			String line;
 			String contents = "";
+			
+			LOGGER.info("Reading configuration from file {}.", filename);
 			
 			while ((line = reader.readLine()) != null)
 			{
@@ -68,7 +71,6 @@ public class SettingsManager {
 			
 			LOGGER.debug("File contents: {}", contents);
 			settings = jsonToJava(contents);
-			LOGGER.debug("Retrieved Settings object: {}", settings.toString());
 			
 			boolean hasDefault = false;
 			
@@ -83,14 +85,16 @@ public class SettingsManager {
 			
 			if (!hasDefault)
 			{
+				LOGGER.debug("Retrieved Settings doesn't have a default command flag, adding one.");
 				settings.commandFlags.add(new CommandFlag());
 			}
 			return true;
 			
 		} catch (FileNotFoundException e) {
 			LOGGER.error("Unable to find file {}, creating a default file.", filename);
-			try {
-				Files.writeFile(javaToJson(new Settings()), Paths.get(filename).toFile());
+			
+			try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8"))) {
+				writer.write(javaToJson(new Settings()));
 				return false;
 			} catch (IOException e1) {
 				LOGGER.error("Unable to create default file {}. Exiting.", filename);
@@ -112,11 +116,9 @@ public class SettingsManager {
 	 * @return true if successful, false if not
 	 */
 	public boolean writeSettings(String filename) {
-		LOGGER.debug("Writing settings {} to file {}", settings.toString(), filename);
-		try {
-		    BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
-		    writer.write(javaToJson(settings));
-		     
+		LOGGER.info("Writing settings {} to file {}", settings.toString(), filename);
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")))  {
+		    writer.write(javaToJson(settings));		     
 		    writer.close();
 		    return true;
 		} catch (IOException e) {

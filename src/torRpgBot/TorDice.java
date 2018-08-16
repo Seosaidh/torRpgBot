@@ -16,7 +16,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.dv8tion.jda.core.entities.Emote;
 import net.dv8tion.jda.core.entities.Guild;
 
 
@@ -39,6 +38,7 @@ public abstract class TorDice extends Command{
 	}
 	
 	private torDiceInterface diceProvider;
+	private EmoteInterface emoteProvider;
 	private final Logger LOGGER = LogManager.getLogger(TorDice.class.getName());
 	
 
@@ -59,39 +59,17 @@ public abstract class TorDice extends Command{
 		public String skillName = "";
 		
 		public String toString() {
-			return "isWeary: " + isWeary + ", hasAdvantage: " + hasAdvantage + ", hasDisadvantage: " + hasDisadvantage +
+			return "CommandResults object: isWeary: " + isWeary + ", hasAdvantage: " + hasAdvantage + ", hasDisadvantage: " + hasDisadvantage +
 					", parseSuccessful: " + parseSuccessful + ", numOfSucces: " + numOfSuccess + ", numOfMastery: " +
 					numOfMastery + ", modifier: " + modifier + ", targetNumber: " + targetNumber + ", skillName: " + skillName;
 		}
 	}
 	
-	private class EmoteIds {
-		public String d121 = "1";
-		public String d122 = "2";
-		public String d123 = "3";
-		public String d124 = "4";
-		public String d125 = "5";
-		public String d126 = "6";
-		public String d127 = "7";
-		public String d128 = "8";
-		public String d129 = "9";
-		public String d1210 = "10";
-		public String d1211 = "11";
-		public String d1212 = "12";
-		public String d61 = "1";
-		public String d62 = "2";
-		public String d63 = "3";
-		public String d64 = "4";
-		public String d65 = "5";
-		public String d66 = "6";
-		public String d61weary = "1";
-		public String d62weary = "2";
-		public String d63weary = "3";
-	}
 	
-	public TorDice(List<CommandFlag> flag, torDiceInterface dice) {
+	public TorDice(List<CommandFlag> flag, torDiceInterface dice, EmoteInterface emotes) {
 		super(flag);
 		diceProvider = dice;
+		emoteProvider = emotes;
 	}
 
 	
@@ -141,95 +119,11 @@ public abstract class TorDice extends Command{
 			LOGGER.debug("No success dice to roll, setting the results to an empty array");
 			successDice = new int[0];
 		}
-		EmoteIds emoteStrings = getEmoteStrings(guild);
 		
-		return compileResult(feat, successDice, isAdversary, parsedCommand, author, emoteStrings);
-	}
-	
-	/**
-	 * This function will go through the various emojis in the given guild and grab the full string needed for a bot to use
-	 * a custom emoji and place it into the relevant part of EmoteIds. If an emote name doesn't exist, then it will not be
-	 * placed into the EmoteIds class, and the default will be used.
-	 * The string needed to use a custom emote is <:emoji_name:emoji_id>
-	 * @param guild The server that the message will be sent to, and so the one needed to retrieve the emoji id from.
-	 * @return EmoteIds A container class that has all the possible dice faces and the string representing the emoji.
-	 */
-	private EmoteIds getEmoteStrings(Guild guild) {
-		EmoteIds result = new EmoteIds();
-		List<Emote> emotes = guild.getEmotes();
-
-		for (Emote e : emotes)
-		{
-			switch (e.getName())
-			{
-			case "d121":
-				result.d121 = "<:d121:" + e.getId()+ ">";
-				break;
-			case "d122":
-				result.d122 = "<:d122:" + e.getId()+ ">";
-				break;
-			case "d123":
-				result.d123 = "<:d123:" + e.getId()+ ">";
-				break;
-			case "d124":
-				result.d124 = "<:d124:" + e.getId()+ ">";
-				break;
-			case "d125":
-				result.d125 = "<:d125:" + e.getId()+ ">";
-				break;
-			case "d126":
-				result.d126 = "<:d126:" + e.getId()+ ">";
-				break;
-			case "d127":
-				result.d127 = "<:d127:" + e.getId()+ ">";
-				break;
-			case "d128":
-				result.d128 = "<:d128:" + e.getId()+ ">";
-				break;
-			case "d129":
-				result.d129 = "<:d129:" + e.getId()+ ">";
-				break;
-			case "d1210":
-				result.d1210 = "<:d1210:" + e.getId()+ ">";
-				break;
-			case "d1211":
-				result.d1211 = "<:d1211:" + e.getId()+ ">";
-				break;
-			case "d1212":
-				result.d1212 = "<:d1212:" + e.getId()+ ">";
-				break;
-			case "d61":
-				result.d61 = "<:d61:" + e.getId()+ ">";
-				break;
-			case "d62":
-				result.d62 = "<:d62:" + e.getId()+ ">";
-				break;
-			case "d63":
-				result.d63 = "<:d63:" + e.getId()+ ">";
-				break;
-			case "d64":
-				result.d64 = "<:d64:" + e.getId()+ ">";
-				break;
-			case "d65":
-				result.d65 = "<:d65:" + e.getId()+ ">";
-				break;
-			case "d66":
-				result.d66 = "<:d66:" + e.getId()+ ">";
-				break;
-			case "d61weary":
-				result.d61weary = "<:d61weary:" + e.getId()+ ">";
-				break;
-			case "d62weary":
-				result.d62weary = "<:d62weary:" + e.getId()+ ">";
-				break;
-			case "d63weary":
-				result.d63weary = "<:d63weary:" + e.getId()+ ">";
-				break;
-			default:
-				break;
-			}
-		}
-		return result;
+		// We must call this function before compileResults, since compileResults doesn't get a copy of the Guild
+		// but we need to load the strings before compileResults calls for them.
+		emoteProvider.getEmoteStrings(guild);
+		return compileResult(feat, successDice, isAdversary, parsedCommand, author);
 	}
 	
 	
@@ -571,105 +465,9 @@ public abstract class TorDice extends Command{
 	}
 	
 	
-	/**
-	 * This function returns the string representation of the given feat result given the emoji ids and whether 
-	 * the roll was performed by an adversary.
-	 * @param feat The result of the feat die. 0 for the relevant face
-	 * @param isAdversary Whether the roll was performed by an adversary. Necessary to interpret the result of 0
-	 * @param emoteStrings The structure containing the strings to use for the dice faces.
-	 * @return String to insert into roll results.
-	 */
-	private String getFeatString(int feat, boolean isAdversary, EmoteIds emoteStrings) {
-		if (isAdversary && feat == 0)
-		{
-			return emoteStrings.d1212;
-		}
-		else if (!isAdversary && feat == 0)
-		{
-			return emoteStrings.d1211;
-		}
-		else
-		{
-			switch (feat) {
-			case 1:
-				return emoteStrings.d121;
-			case 2: 
-				return emoteStrings.d122;
-			case 3: 
-				return emoteStrings.d123;
-			case 4: 
-				return emoteStrings.d124;
-			case 5: 
-				return emoteStrings.d125;
-			case 6: 
-				return emoteStrings.d126;
-			case 7:
-				return emoteStrings.d127;
-			case 8: 
-				return emoteStrings.d128;
-			case 9: 
-				return emoteStrings.d129;
-			case 10: 
-				return emoteStrings.d1210;
-			case 11:
-				return emoteStrings.d1211;
-			case 12:
-				return emoteStrings.d1212;
-			default:
-				LOGGER.error("Unable to find face for feat result of {}", feat);
-				return "-1";
-					
-			}
-		}
-	}
+
 	
-	/**
-	 * This function will return the proper string to use for the result of the given success die roll.
-	 * @param success The result on the success die
-	 * @param emoteStrings The structure of strings for the die faces
-	 * @param isWeary Whether or not the character is weary
-	 * @return String to insert into the roll results
-	 */
-	private String getSuccessString(int success, EmoteIds emoteStrings, boolean isWeary) {
-		switch(success) {
-		case 1:
-			if (isWeary)
-			{
-				return emoteStrings.d61weary;
-			}
-			else
-			{
-				return emoteStrings.d61;
-			}
-		case 2:
-			if (isWeary)
-			{
-				return emoteStrings.d62weary;
-			}
-			else
-			{
-				return emoteStrings.d62;
-			}
-		case 3:
-			if (isWeary)
-			{
-				return emoteStrings.d63weary;
-			}
-			else
-			{
-				return emoteStrings.d63;
-			}
-		case 4:
-			return emoteStrings.d64;
-		case 5:
-			return emoteStrings.d65;
-		case 6:
-			return emoteStrings.d66;
-		default:
-				LOGGER.error("Unable to find face for success result of {}", success);
-				return "-1";
-		}
-	}
+
 	
 	/**
 	 * This function takes the feat result and the array of success results,
@@ -682,7 +480,7 @@ public abstract class TorDice extends Command{
 	 * @return String to be sent to Discord describing the roll and the result.
 	 */
 	/* private -> testing*/ String compileResult(int[] feat, int[] success, boolean isAdversary,
-			CommandResults command, String author, EmoteIds emoteStrings) {
+			CommandResults command, String author) {
 		String result = author;
 		// Final String: NAME [wearily] rolled SKILL and got: FEAT; SUCCESS1, SUCCESS2, ... = SUM >|< TN A [Great|Extraordinary] Success!\n Unused dice: unusedFeat, mastery
 		int sum = 0;
@@ -710,28 +508,28 @@ public abstract class TorDice extends Command{
 			finalFeatResult = sum = feat[0];
 		}
 		
-		featString = getFeatString(finalFeatResult, isAdversary, emoteStrings);
+		featString = emoteProvider.getFeatString(finalFeatResult, isAdversary);
 		boolean isGreatSuccess = false;
 		boolean isExtraordinarySuccess = false;
 		
 		if (command.hasAdvantage)
 		{
-			unusedFeat = getFeatString(Math.min(feat[0], feat[1]), isAdversary, emoteStrings);
+			unusedFeat = emoteProvider.getFeatString(Math.min(feat[0], feat[1]), isAdversary);
 		}
 		else if (command.hasDisadvantage)
 		{
-			unusedFeat = getFeatString(Math.max(feat[0], feat[1]), isAdversary, emoteStrings);
+			unusedFeat = emoteProvider.getFeatString(Math.max(feat[0], feat[1]), isAdversary);
 		}
 		
 		for (int i = 0; i < success.length; i++)
 		{
 			if (i >= command.numOfSuccess)
 			{
-				mastery = mastery.concat(", " + getSuccessString(success[i], emoteStrings, command.isWeary));
+				mastery = mastery.concat(", " + emoteProvider.getSuccessString(success[i], command.isWeary));
 			}
 			else
 			{
-				successString = successString.concat(", " + getSuccessString(success[i], emoteStrings, command.isWeary));
+				successString = successString.concat(", " + emoteProvider.getSuccessString(success[i], command.isWeary));
 			}
 			
 			if (i >= command.numOfSuccess)
