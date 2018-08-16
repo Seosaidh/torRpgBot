@@ -51,8 +51,8 @@ public class TorDiceTest {
 	
 	private class TestClass extends TorDice {
 
-		public TestClass(List<CommandFlag> flag, torDiceInterface dice) {
-			super(flag, dice);
+		public TestClass(List<CommandFlag> flag, torDiceInterface dice, EmoteInterface emotes) {
+			super(flag, dice, emotes);
 		}
 
 		@Override
@@ -88,8 +88,8 @@ public class TorDiceTest {
 	
 	public TestDice diceProvider = new TestDice(new int[] {1}, new int[] {1});
 	public List<CommandFlag> tempList = new ArrayList<CommandFlag>();
-	private CommandFlag cf = new CommandFlag();
-	public TestClass testClass = new TestClass(tempList, diceProvider);
+	private EmoteInterface emotes = new EmoteStrings();
+	public TestClass testClass = new TestClass(tempList, diceProvider, emotes);
 	
 	
 

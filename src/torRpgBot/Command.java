@@ -61,15 +61,18 @@ public abstract class Command extends ListenerAdapter {
 	
 	public String getFlag(String server) {
 		String defaultFlag = "!";
-		for (CommandFlag cf : commandFlags)
+		if (commandFlags.size() > 0)
 		{
-			if (cf.server.equalsIgnoreCase(server))
+			for (CommandFlag cf : commandFlags)
 			{
-				return cf.commandFlag;
-			}
-			else if (cf.server.equalsIgnoreCase("default"))
-			{
-				defaultFlag = cf.commandFlag;
+				if (cf.server.equalsIgnoreCase(server))
+				{
+					return cf.commandFlag;
+				}
+				else if (cf.server.equalsIgnoreCase("default"))
+				{
+					defaultFlag = cf.commandFlag;
+				}
 			}
 		}
 		return defaultFlag;
@@ -96,14 +99,14 @@ public abstract class Command extends ListenerAdapter {
 	 */
 	@Override
     public void onMessageReceived(MessageReceivedEvent event) {
-		String flag = getFlag(event.getGuild().getName());
+
 		if (event.getAuthor().isBot() || !event.isFromType(ChannelType.TEXT) ||
-				!event.getMessage().getContentDisplay().trim().startsWith(flag))
+				!event.getMessage().getContentDisplay().trim().startsWith(getFlag(event.getGuild().getName())))
 		{
 			return;
 		}
 		
-		if (getAliases().contains(event.getMessage().getContentDisplay().trim().toLowerCase().split(" ")[0].substring(flag.length())))
+		if (getAliases().contains(event.getMessage().getContentDisplay().trim().toLowerCase().split(" ")[0].substring(getFlag(event.getGuild().getName()).length())))
 		{
 			handleCommand(event);
 		}
