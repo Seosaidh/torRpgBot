@@ -29,7 +29,7 @@ public class AdversaryCommand extends TorDice {
 	
 	private final Logger LOGGER = LogManager.getLogger(AdversaryCommand.class.getName());
 	
-	public AdversaryCommand (List<CommandFlag> flag, torDiceInterface dice, EmoteInterface emoteProvider) {
+	public AdversaryCommand (List<CommandFlag> flag, TorDiceInterface dice, EmoteInterface emoteProvider) {
 		super(flag, dice, emoteProvider);
 	}
 
