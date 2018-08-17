@@ -27,6 +27,7 @@ public class torRpgBot {
 		SettingsManager settingsManager = new SettingsManager("torRpgBotSettings.json");
 		EmoteInterface emoteRollProvider = new EmoteStrings();
 		EmoteInterface emoteAdversaryProvider = new EmoteStrings();
+		EmoteInterface emoteFreeProvider = new EmoteStrings();
 		
 		settingsManager.loadSettings();
 		
@@ -43,6 +44,7 @@ public class torRpgBot {
         	jdaBuilder.addEventListener(helpCommand.registerCommand(new RollCommand(settingsManager.getSettings().commandFlags, dice, emoteRollProvider)));
         	jdaBuilder.addEventListener(helpCommand.registerCommand(new AdversaryCommand(settingsManager.getSettings().commandFlags, dice, emoteAdversaryProvider)));
         	jdaBuilder.addEventListener(helpCommand.registerCommand(new SetFlag(settingsManager.getSettings().commandFlags, settingsManager)));
+        	jdaBuilder.addEventListener(helpCommand.registerCommand(new FreeDice(settingsManager.getSettings().commandFlags, emoteFreeProvider, dice)));
             
             @SuppressWarnings("unused")
 			JDA jda = jdaBuilder.buildBlocking();
