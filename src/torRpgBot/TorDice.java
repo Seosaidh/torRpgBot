@@ -21,11 +21,6 @@ import net.dv8tion.jda.core.entities.Guild;
 
 public abstract class TorDice extends Command{
 	
-	public interface torDiceInterface {
-		public int rolld6();
-		public int rolld12();
-	}
-	
 	enum POSSIBLE{
 		OPTIONS,
 		SUCCESS,
@@ -37,7 +32,7 @@ public abstract class TorDice extends Command{
 		TN
 	}
 	
-	private torDiceInterface diceProvider;
+	private TorDiceInterface diceProvider;
 	private EmoteInterface emoteProvider;
 	private final Logger LOGGER = LogManager.getLogger(TorDice.class.getName());
 	
@@ -66,7 +61,7 @@ public abstract class TorDice extends Command{
 	}
 	
 	
-	public TorDice(List<CommandFlag> flag, torDiceInterface dice, EmoteInterface emotes) {
+	public TorDice(List<CommandFlag> flag, TorDiceInterface dice, EmoteInterface emotes) {
 		super(flag);
 		diceProvider = dice;
 		emoteProvider = emotes;

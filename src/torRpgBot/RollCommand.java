@@ -29,7 +29,7 @@ public class RollCommand extends TorDice{
 	
 	private final Logger LOGGER = LogManager.getLogger(RollCommand.class.getName());
 	
-	public RollCommand(List<CommandFlag> flag, torDiceInterface dice, EmoteInterface emoteProvider) {
+	public RollCommand(List<CommandFlag> flag, TorDiceInterface dice, EmoteInterface emoteProvider) {
 		super(flag, dice, emoteProvider);
 	}
 

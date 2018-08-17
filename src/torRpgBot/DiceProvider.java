@@ -2,9 +2,7 @@ package torRpgBot;
 
 import java.util.Random;
 
-import torRpgBot.TorDice.torDiceInterface;
-
-public class DiceProvider implements torDiceInterface {
+public class DiceProvider implements TorDiceInterface {
 	
 	private static Random rand = new Random();
 

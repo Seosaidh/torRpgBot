@@ -8,11 +8,10 @@ import org.testng.annotations.Test;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import torRpgBot.TorDice.CommandResults;
-import torRpgBot.TorDice.torDiceInterface;
 
 public class TorDiceTest {
 	
-	private class TestDice implements torDiceInterface {
+	private class TestDice implements TorDiceInterface {
 		
 		int[] d6, d12;
 		int d6Index = 0;
@@ -51,7 +50,7 @@ public class TorDiceTest {
 	
 	private class TestClass extends TorDice {
 
-		public TestClass(List<CommandFlag> flag, torDiceInterface dice, EmoteInterface emotes) {
+		public TestClass(List<CommandFlag> flag, TorDiceInterface dice, EmoteInterface emotes) {
 			super(flag, dice, emotes);
 		}
 
