@@ -9,4 +9,14 @@ package torRpgBot;
 public class CommandFlag {
 	public String server = "default";
 	public String commandFlag = "!";
+	
+	public CommandFlag() {
+		server = "default";
+		commandFlag = "!";
+	}
+	
+	public CommandFlag(String guild, String flag) {
+		server = guild;
+		commandFlag = flag;
+	}
 }

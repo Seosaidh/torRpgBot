@@ -24,6 +24,11 @@ import com.google.gson.GsonBuilder;
 public class SettingsManager {
 	private Settings settings = new Settings();
 	private final Logger LOGGER = LogManager.getLogger(SettingsManager.class.getName());
+	private String settingsFile;
+	
+	public SettingsManager(String filename) {
+		this.settingsFile = filename;
+	}
 	
 	
 	private String javaToJson(Settings settingsObject) {
@@ -55,12 +60,12 @@ public class SettingsManager {
 	 * @param filename The name of the file to laod the settings from.
 	 * @return boolean true if successfully loaded settings, false otherwise.
 	 */
-	public boolean loadSettings(String filename) {
-		try (BufferedReader reader = new BufferedReader(new FileReader(filename))){
+	public boolean loadSettings() {
+		try (BufferedReader reader = new BufferedReader(new FileReader(settingsFile))){
 			String line;
 			String contents = "";
 			
-			LOGGER.info("Reading configuration from file {}.", filename);
+			LOGGER.info("Reading configuration from file {}.", settingsFile);
 			
 			while ((line = reader.readLine()) != null)
 			{
@@ -91,19 +96,19 @@ public class SettingsManager {
 			return true;
 			
 		} catch (FileNotFoundException e) {
-			LOGGER.error("Unable to find file {}, creating a default file.", filename);
+			LOGGER.error("Unable to find file {}, creating a default file.", settingsFile);
 			
-			try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8"))) {
+			try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(settingsFile), "utf-8"))) {
 				writer.write(javaToJson(new Settings()));
 				return false;
 			} catch (IOException e1) {
-				LOGGER.error("Unable to create default file {}. Exiting.", filename);
+				LOGGER.error("Unable to create default file {}. Exiting.", settingsFile);
 				System.exit(1);
 				return false;
 			}
 		}
 		catch (IOException e) {
-			LOGGER.error("Error in reading file {}. Using default settings", filename);
+			LOGGER.error("Error in reading file {}. Using default settings", settingsFile);
 			return false;
 		}
 	}
@@ -112,17 +117,16 @@ public class SettingsManager {
 	/**
 	 * This function will write the current Settings object stored by the SettingsManager into the given file
 	 * as a JSON object. It will return true if this was successful and false otherwise.
-	 * @param filename to write the settings to
 	 * @return true if successful, false if not
 	 */
-	public boolean writeSettings(String filename) {
-		LOGGER.info("Writing settings {} to file {}", settings.toString(), filename);
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")))  {
+	public boolean writeSettings() {
+		LOGGER.info("Writing settings {} to file {}", settings.toString(), settingsFile);
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(settingsFile), "utf-8")))  {
 		    writer.write(javaToJson(settings));		     
 		    writer.close();
 		    return true;
 		} catch (IOException e) {
-			LOGGER.error("Unable to write settings to file {}.", filename);
+			LOGGER.error("Unable to write settings to file {}.", settingsFile);
 			e.printStackTrace();
 			return false;
 		}
@@ -135,5 +139,36 @@ public class SettingsManager {
 	 */
 	public Settings getSettings() {
 		return settings;
+	}
+	
+	/**
+	 * This function will set the command flag for the server as specified in the passed in CommandFlag object.
+	 * If the given server doesn't currently exist in the list of command flag settings, then it will be added.
+	 * @param commandFlag The CommandFlag object to set or add to the settings.
+	 * @return boolean True if the settings were updated and written, false otherwise.
+	 */
+	public boolean setCommandFlag(CommandFlag commandFlag) {
+		
+		LOGGER.info("Adding flag {} to server {}", commandFlag.commandFlag, commandFlag.server);
+		boolean foundServer = false;
+		for (CommandFlag cf : settings.commandFlags)
+		{
+			LOGGER.debug("Comparing to {}", cf.server);
+			if (cf.server.equalsIgnoreCase(commandFlag.server))
+			{
+				LOGGER.debug("Servers matched, updating server instead of adding.");
+				cf.commandFlag = commandFlag.commandFlag;
+				foundServer = true;
+			}
+		}
+		
+		if (!foundServer)
+		{
+			LOGGER.debug("Didn't find server, adding to list.");
+			settings.commandFlags.add(commandFlag);
+		}
+		
+		return this.writeSettings();
+		
 	}
 }
