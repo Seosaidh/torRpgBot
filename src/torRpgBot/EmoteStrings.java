@@ -1,5 +1,6 @@
 package torRpgBot;
 
+import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,27 +12,7 @@ import net.dv8tion.jda.core.entities.Guild;
 public class EmoteStrings implements EmoteInterface{
 	
 	private final Logger LOGGER = LogManager.getLogger(EmoteStrings.class.getName());
-	public String d121 = "1";
-	public String d122 = "2";
-	public String d123 = "3";
-	public String d124 = "4";
-	public String d125 = "5";
-	public String d126 = "6";
-	public String d127 = "7";
-	public String d128 = "8";
-	public String d129 = "9";
-	public String d1210 = "10";
-	public String d1211 = "11";
-	public String d1212 = "12";
-	public String d61 = "1";
-	public String d62 = "2";
-	public String d63 = "3";
-	public String d64 = "4";
-	public String d65 = "5";
-	public String d66 = "6";
-	public String d61weary = "1";
-	public String d62weary = "2";
-	public String d63weary = "3";
+	static private Hashtable<String, Hashtable<String, String>> servers = new Hashtable<String, Hashtable<String, String>>();
 		
 		
 	/**
@@ -42,129 +23,103 @@ public class EmoteStrings implements EmoteInterface{
 	 * @param guild The server that the message will be sent to, and so the one needed to retrieve the emoji id from.
 	 * @return void
 	 */
-	public void getEmoteStrings(Guild guild) {
+	private void getEmoteStrings(Guild guild, boolean forceReload) {
+		if (servers.containsKey(guild.getId()) && !forceReload)
+		{
+			return;
+		}
+		
+		LOGGER.debug("Getting emote strings for server {}", guild.getName());
+		Hashtable<String, String> emoteTable = new Hashtable<String, String>();
+		
 		List<Emote> emotes = guild.getEmotes();
 		
 		LOGGER.debug("Getting emotes from guild {}.", guild.getName());
 	
 		for (Emote e : emotes)
 		{
-			switch (e.getName())
+			if (e.getName().matches("^(a){0,1}d((12)|(6))[1-9]([012]{0,1}(weary){0,1})"))
 			{
-			case "d121":
-				this.d121 = "<:d121:" + e.getId()+ ">";
-				break;
-			case "d122":
-				this.d122 = "<:d122:" + e.getId()+ ">";
-				break;
-			case "d123":
-				this.d123 = "<:d123:" + e.getId()+ ">";
-				break;
-			case "d124":
-				this.d124 = "<:d124:" + e.getId()+ ">";
-				break;
-			case "d125":
-				this.d125 = "<:d125:" + e.getId()+ ">";
-				break;
-			case "d126":
-				this.d126 = "<:d126:" + e.getId()+ ">";
-				break;
-			case "d127":
-				this.d127 = "<:d127:" + e.getId()+ ">";
-				break;
-			case "d128":
-				this.d128 = "<:d128:" + e.getId()+ ">";
-				break;
-			case "d129":
-				this.d129 = "<:d129:" + e.getId()+ ">";
-				break;
-			case "d1210":
-				this.d1210 = "<:d1210:" + e.getId()+ ">";
-				break;
-			case "d1211":
-				this.d1211 = "<:d1211:" + e.getId()+ ">";
-				break;
-			case "d1212":
-				this.d1212 = "<:d1212:" + e.getId()+ ">";
-				break;
-			case "d61":
-				this.d61 = "<:d61:" + e.getId()+ ">";
-				break;
-			case "d62":
-				this.d62 = "<:d62:" + e.getId()+ ">";
-				break;
-			case "d63":
-				this.d63 = "<:d63:" + e.getId()+ ">";
-				break;
-			case "d64":
-				this.d64 = "<:d64:" + e.getId()+ ">";
-				break;
-			case "d65":
-				this.d65 = "<:d65:" + e.getId()+ ">";
-				break;
-			case "d66":
-				this.d66 = "<:d66:" + e.getId()+ ">";
-				break;
-			case "d61weary":
-				this.d61weary = "<:d61weary:" + e.getId()+ ">";
-				break;
-			case "d62weary":
-				this.d62weary = "<:d62weary:" + e.getId()+ ">";
-				break;
-			case "d63weary":
-				this.d63weary = "<:d63weary:" + e.getId()+ ">";
-				break;
-			default:
-				break;
+				LOGGER.debug("Inserting emote string {} for emote {}.", ("<:" + e.getName() + ":" + e.getId() + ">"), e.getName());
+				emoteTable.putIfAbsent(e.getName(), "<:" + e.getName() + ":" + e.getId() + ">");
 			}
 		}
+		
+		emoteTable.putIfAbsent("d121", "1");
+		emoteTable.putIfAbsent("d122", "2");
+		emoteTable.putIfAbsent("d123", "3");
+		emoteTable.putIfAbsent("d124", "4");
+		emoteTable.putIfAbsent("d125", "5");
+		emoteTable.putIfAbsent("d126", "6");
+		emoteTable.putIfAbsent("d127", "7");
+		emoteTable.putIfAbsent("d128", "8");
+		emoteTable.putIfAbsent("d129", "9");
+		emoteTable.putIfAbsent("d1210", "10");
+		emoteTable.putIfAbsent("d1211", "11");
+		emoteTable.putIfAbsent("d1212", "12");
+		emoteTable.putIfAbsent("d61", "1");
+		emoteTable.putIfAbsent("d62", "2");
+		emoteTable.putIfAbsent("d63", "3");
+		emoteTable.putIfAbsent("d64", "4");
+		emoteTable.putIfAbsent("d65", "5");
+		emoteTable.putIfAbsent("d66", "6");
+		emoteTable.putIfAbsent("d61weary", "1");
+		emoteTable.putIfAbsent("d62weary", "2");
+		emoteTable.putIfAbsent("d63weary", "3");
+		
+		emoteTable.putIfAbsent("ad121", emoteTable.get("d121"));
+		emoteTable.putIfAbsent("ad122", emoteTable.get("d122"));
+		emoteTable.putIfAbsent("ad123", emoteTable.get("d123"));
+		emoteTable.putIfAbsent("ad124", emoteTable.get("d124"));
+		emoteTable.putIfAbsent("ad125", emoteTable.get("d125"));
+		emoteTable.putIfAbsent("ad126", emoteTable.get("d126"));
+		emoteTable.putIfAbsent("ad127", emoteTable.get("d127"));
+		emoteTable.putIfAbsent("ad128", emoteTable.get("d128"));
+		emoteTable.putIfAbsent("ad129", emoteTable.get("d129"));
+		emoteTable.putIfAbsent("ad1210", emoteTable.get("d1210"));
+		emoteTable.putIfAbsent("ad1211", emoteTable.get("d1211"));
+		emoteTable.putIfAbsent("ad1212", emoteTable.get("d1212"));
+		emoteTable.putIfAbsent("ad61", emoteTable.get("d61"));
+		emoteTable.putIfAbsent("ad62", emoteTable.get("d62"));
+		emoteTable.putIfAbsent("ad63", emoteTable.get("d63"));
+		emoteTable.putIfAbsent("ad64", emoteTable.get("d64"));
+		emoteTable.putIfAbsent("ad65", emoteTable.get("d65"));
+		emoteTable.putIfAbsent("ad66", emoteTable.get("d66"));
+		emoteTable.putIfAbsent("ad61weary", emoteTable.get("d61weary"));
+		emoteTable.putIfAbsent("ad62weary", emoteTable.get("d62weary"));
+		emoteTable.putIfAbsent("ad63weary", emoteTable.get("d63weary"));
+		
+		servers.put(guild.getId(), emoteTable);
 	}
 	
 	/**
 	 * This function will return the proper string to use for the result of the given success die roll.
 	 * @param success The result on the success die
 	 * @param isWeary Whether or not the character is weary
+	 * @param isAdversary Whether an adversary is rolling
+	 * @param guild The guild to retrieve the string from
 	 * @return String to insert into the roll results
 	 */
-	public String getSuccessString(int success, boolean isWeary) {
-		switch(success) {
-		case 1:
-			if (isWeary)
-			{
-				return this.d61weary;
-			}
-			else
-			{
-				return this.d61;
-			}
-		case 2:
-			if (isWeary)
-			{
-				return this.d62weary;
-			}
-			else
-			{
-				return this.d62;
-			}
-		case 3:
-			if (isWeary)
-			{
-				return this.d63weary;
-			}
-			else
-			{
-				return this.d63;
-			}
-		case 4:
-			return this.d64;
-		case 5:
-			return this.d65;
-		case 6:
-			return this.d66;
-		default:
-				LOGGER.error("Unable to find face for success result of {}", success);
-				return "-1";
+	public String getSuccessString(int success, boolean isWeary, boolean isAdversary, Guild guild) {
+		getEmoteStrings(guild, false);
+		String key = "";
+		
+		if (isAdversary)
+		{
+			key = key.concat("a");
 		}
+		
+		key = key.concat("d6");
+		
+		key = key.concat(String.valueOf(success));
+		
+		if (success <= 3 && isWeary)
+		{
+			key = key.concat("weary");
+		}
+		
+		LOGGER.debug("Getting emote string for success die result of {}. Key is {}", success, key);
+		return servers.get(guild.getId()).get(key);
 	}
 	
 	/**
@@ -172,49 +127,43 @@ public class EmoteStrings implements EmoteInterface{
 	 * the roll was performed by an adversary.
 	 * @param feat The result of the feat die. 0 for the relevant face
 	 * @param isAdversary Whether the roll was performed by an adversary. Necessary to interpret the result of 0
+	 * @param guild The guild requesting the string
 	 * @return String to insert into roll results.
 	 */
-	public String getFeatString(int feat, boolean isAdversary) {
-		if (isAdversary && feat == 0)
+	public String getFeatString(int feat, boolean isAdversary, Guild guild) {
+		getEmoteStrings(guild, false);
+		String key = "";
+		
+		if (isAdversary)
 		{
-			return this.d1212;
+			key = key.concat("a");
 		}
-		else if (!isAdversary && feat == 0)
+		
+		key = key.concat("d12");
+		
+		if (feat != 0)
 		{
-			return this.d1211;
+			key = key.concat(String.valueOf(feat));
 		}
 		else
 		{
-			switch (feat) {
-			case 1:
-				return this.d121;
-			case 2: 
-				return this.d122;
-			case 3: 
-				return this.d123;
-			case 4: 
-				return this.d124;
-			case 5: 
-				return this.d125;
-			case 6: 
-				return this.d126;
-			case 7:
-				return this.d127;
-			case 8: 
-				return this.d128;
-			case 9: 
-				return this.d129;
-			case 10: 
-				return this.d1210;
-			case 11:
-				return this.d1211;
-			case 12:
-				return this.d1212;
-			default:
-				LOGGER.error("Unable to find face for feat result of {}", feat);
-				return "-1";
-					
+			if (isAdversary)
+			{
+				key = key.concat(String.valueOf(12));
+			}
+			else
+			{
+				key = key.concat(String.valueOf(11));
 			}
 		}
+		
+		LOGGER.debug("Getting emote string for feat die result of {}. Key is {}", feat, key);
+		
+		return servers.get(guild.getId()).get(key);
+	}
+	
+	public void reloadEmotes(Guild guild)
+	{
+		getEmoteStrings(guild, true);
 	}
 }

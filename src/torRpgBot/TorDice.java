@@ -114,11 +114,8 @@ public abstract class TorDice extends Command{
 			LOGGER.debug("No success dice to roll, setting the results to an empty array");
 			successDice = new int[0];
 		}
-		
-		// We must call this function before compileResults, since compileResults doesn't get a copy of the Guild
-		// but we need to load the strings before compileResults calls for them.
-		emoteProvider.getEmoteStrings(guild);
-		return compileResult(feat, successDice, isAdversary, parsedCommand, author);
+
+		return compileResult(feat, successDice, isAdversary, parsedCommand, author, guild);
 	}
 	
 	
@@ -475,7 +472,7 @@ public abstract class TorDice extends Command{
 	 * @return String to be sent to Discord describing the roll and the result.
 	 */
 	/* private -> testing*/ String compileResult(int[] feat, int[] success, boolean isAdversary,
-			CommandResults command, String author) {
+			CommandResults command, String author, Guild guild) {
 		String result = author;
 		// Final String: NAME [wearily] rolled SKILL and got: FEAT; SUCCESS1, SUCCESS2, ... = SUM >|< TN A [Great|Extraordinary] Success!\n Unused dice: unusedFeat, mastery
 		int sum = 0;
@@ -503,28 +500,30 @@ public abstract class TorDice extends Command{
 			finalFeatResult = sum = feat[0];
 		}
 		
-		featString = emoteProvider.getFeatString(finalFeatResult, isAdversary);
+		featString = emoteProvider.getFeatString(finalFeatResult, isAdversary, guild);
 		boolean isGreatSuccess = false;
 		boolean isExtraordinarySuccess = false;
 		
 		if (command.hasAdvantage)
 		{
-			unusedFeat = emoteProvider.getFeatString(Math.min(feat[0], feat[1]), isAdversary);
+			unusedFeat = emoteProvider.getFeatString(Math.min(feat[0], feat[1]), isAdversary, guild);
 		}
 		else if (command.hasDisadvantage)
 		{
-			unusedFeat = emoteProvider.getFeatString(Math.max(feat[0], feat[1]), isAdversary);
+			unusedFeat = emoteProvider.getFeatString(Math.max(feat[0], feat[1]), isAdversary, guild);
 		}
 		
 		for (int i = 0; i < success.length; i++)
 		{
 			if (i >= command.numOfSuccess)
 			{
-				mastery = mastery.concat(", " + emoteProvider.getSuccessString(success[i], command.isWeary));
+				mastery = mastery.concat(", " +
+						emoteProvider.getSuccessString(success[i], command.isWeary, isAdversary, guild));
 			}
 			else
 			{
-				successString = successString.concat(", " + emoteProvider.getSuccessString(success[i], command.isWeary));
+				successString = successString.concat(", " +
+						emoteProvider.getSuccessString(success[i], command.isWeary, isAdversary, guild));
 			}
 			
 			if (i >= command.numOfSuccess)
