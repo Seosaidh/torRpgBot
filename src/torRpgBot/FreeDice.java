@@ -43,7 +43,6 @@ public class FreeDice extends Command {
 	protected void handleCommand(MessageReceivedEvent event) {
 		int numd12 = getNumD12(event.getMessage().getContentDisplay());
 		int numd6 = getNumD6(event.getMessage().getContentDisplay());
-		emotes.getEmoteStrings(event.getGuild());
 		
 		LOGGER.info("Received free dice command: {}.", event.getMessage().getContentDisplay());
 		LOGGER.debug("Num of d12: {}, num of d6: {}", numd12, numd6);
@@ -58,11 +57,11 @@ public class FreeDice extends Command {
 			{
 				if (num == 0)
 				{
-					result = result.concat(emotes.getFeatString(diceRoller.rolld12(), false));
+					result = result.concat(emotes.getFeatString(diceRoller.rolld12(), false, event.getGuild()));
 				}
 				else
 				{
-					result = result.concat(", " + emotes.getFeatString(diceRoller.rolld12(), false));
+					result = result.concat(", " + emotes.getFeatString(diceRoller.rolld12(), false, event.getGuild()));
 				}
 			}
 		}
@@ -75,11 +74,11 @@ public class FreeDice extends Command {
 			{
 				if (num == 0)
 				{
-					result = result.concat(emotes.getSuccessString(diceRoller.rolld6(), false));
+					result = result.concat(emotes.getSuccessString(diceRoller.rolld6(), false, false, event.getGuild()));
 				}
 				else
 				{
-					result = result.concat(", " + emotes.getSuccessString(diceRoller.rolld6(), false));
+					result = result.concat(", " + emotes.getSuccessString(diceRoller.rolld6(), false, false, event.getGuild()));
 				}
 			}
 		}
